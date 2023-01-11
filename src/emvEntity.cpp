@@ -2,133 +2,166 @@
 
 EmvEntity::EmvEntity(QString _filename, QString _language)
 {
+	//Setup empty Configs
     for(int i = 0; i<100; ++i)
     {
         entityConfigurations[i] = EmvConfiguration();
     }
-    language = _language.toUpper();
-    root = xmlReadFile(_filename);
-    xmlsetConfigurations(); // Has to happen first to set up locales
 
+	//Set Language
+	changeLanguage(_language);
+
+	//Read XML File
+	root = xmlGetRootFromFile(_filename);
+
+	//Read Configs first to get Locale Data Set
+    xmlsetConfigurations();
+
+    //Get Meta Data
     xmlsetEntityMetaData();
 
 }
 
 EmvEntity::EmvEntity(){}
 
-//---------------------------------------------------------------------------Getters
+//---------------------------------------------------------------------------------------------------------------------------------- External Data Getters
 
 QString EmvEntity::getEntityID()
 {
-    return entityData["entity_id"];
+	return getEntityDataString("entity_id");
 }
 
 QString EmvEntity::getEntityModelID()
 {
-    return entityData["entity_model_id"];
+	return getEntityDataString("entity_model_id");
 }
 
 QString EmvEntity::getEntityCapabilities()
 {
-    return entityData["entity_capabilities"];
+	return getEntityDataString("entity_capabilities");
 }
 
 int EmvEntity::getMaxStreamSources()
 {
-    int maxSources = 0;
-    try {
-        maxSources = entityData["talker_stream_sources"].toInt();
-    } catch (...){
-        qCritical() << "Could not convert Sources.";
-    }
-    return maxSources;
+	return getEntityDataInt("talker_stream_sources");
 }
 
 QString EmvEntity::getTalkerCapabilities()
 {
-    return entityData["talker_capabilities"];
+	return getEntityDataString("talker_capabilities");
 }
 
 int EmvEntity::getMaxStreamSinks()
 {
-    int maxSources = 0;
-    try {
-        maxSources = entityData["listener_stream_sinks"].toInt();
-    } catch (...){
-        qCritical() << "Could not convert Sources.";
-    }
-    return maxSources;
+	return getEntityDataInt("listener_stream_sinks");
 }
 
 QString EmvEntity::getListenerCapabilities()
 {
-    return entityData["listener_capabilities"];
+	return getEntityDataString("listener_capabilities");
 }
 
 bool EmvEntity::canBeController()
 {
-    return (entityData["controller_capabilities"] == "00000000") ? false : true;
+	if (entityData.contains("controller_capabilities"))
+		return (entityData["controller_capabilities"] == "00000000") ? false : true;
+	else
+		return false;
 }
 
 QString EmvEntity::getAssociationID()
 {
-    return entityData["association_id"];
+	return getEntityDataString("association_id");
 }
 
 QString EmvEntity::getEntityName()
 {
-    return entityData["entity_name"];
+	return getEntityDataString("entity_name");
 }
 
 QString EmvEntity::getFirmwareVersion()
 {
-    return entityData["firmware_version"];
+	return getEntityDataString("firmware_version");
 }
 
 QString EmvEntity::getGroupName()
 {
-    return entityData["group_name"];
+	return getEntityDataString("group_name");
 }
 
 QString EmvEntity::getSerialNumber()
 {
-    return entityData["serial_number"];
+	return getEntityDataString("serial_number");
 }
 
 int EmvEntity::getCurrentConfiguration()
 {
-    int currentIndex = 0;
-    try {
-        currentIndex = entityData["current_configuration"].toInt();
-    } catch (...){
-        qCritical() << "Could not convert Index.";
-    }
-    return currentIndex;
+	return getEntityDataInt("current_configuration");
 }
 
 QString EmvEntity::getVendorName()
 {
-    return entityData["vendor_name"];
+	return getEntityDataString("vendor_name");
 }
 
 QString EmvEntity::getModelName()
 {
-    return entityData["model_name"];
+	return getEntityDataString("model_name");
+}
+
+QString EmvEntity::getConfigurationDescription(int index)
+{
+	return entityConfigurations[index].getConfigurationDescription(language);
 }
 
 QString EmvEntity::getLocale(int index1, int index2)
 {
-    return getLocale(language, index1, index2);
+	return getLocale(language, index1, index2);
+	
 }
 
 QString EmvEntity::getLocale(QString locale, int index1, int index2)
 {
-    return entityConfigurations[getCurrentConfiguration()].getLocaleText(language, index1, index2);
+	return entityConfigurations[getCurrentConfiguration()].getLocaleText(language, index1, index2);
 }
 
-//---------------------------------------------------------------------------Read XML
+//---------------------------------------------------------------------------------------------------------------------------------- Internal Data Getters
 
-QDomElement EmvEntity::xmlReadFile(QString _filename)
+QString EmvEntity::getEntityDataString(QString _key)
+{
+	if (entityData.contains(_key))
+		return entityData[_key];
+	else
+		return "Not Found";
+}
+
+int EmvEntity::getEntityDataInt(QString _key)
+{
+	int maxSources = -1;
+	try
+	{
+		maxSources = entityData[_key].toInt();
+	}
+	catch (...)
+	{
+		qCritical() << "Could not convert Sources.";
+	}
+	return maxSources;
+}
+
+//---------------------------------------------------------------------------------------------------------------------------------- Setters
+
+void EmvEntity::changeLanguage(QString _lang)
+{
+	if (_lang.length() == 2)
+		language = _lang.toUpper();
+	else
+		qCritical() << "Wrong format for Locale Identifier";
+}
+
+//---------------------------------------------------------------------------------------------------------------------------------- Read XML
+
+QDomElement EmvEntity::xmlGetRootFromFile(QString _filename)
 {
     QDomElement entity;
 
@@ -136,7 +169,7 @@ QDomElement EmvEntity::xmlReadFile(QString _filename)
 
     if(!file.open(QIODevice::ReadOnly))
     {
-        qCritical() << "Failes to open file";
+        qCritical() << "Failed to Read File";
         return entity;
     }
     else
@@ -177,8 +210,6 @@ void EmvEntity::xmlsetEntityMetaData()
 
 void EmvEntity::xmlsetConfigurations()
 {
-
-
     //Get Root Config Node
     QDomNode configurationsRoot = root.elementsByTagName("configurations").at(0);
 
@@ -201,7 +232,7 @@ void EmvEntity::xmlReadStringFromNode(QDomElement node)
         index1 = node.firstChild().firstChild().toElement().text().toInt(&status, 16);
         index2 = node.firstChild().lastChild().toElement().text().toInt();
 
-        value =  getLocale("EN", index1, index2);
+        value =  getLocale(index1, index2);
     }
     else
     {

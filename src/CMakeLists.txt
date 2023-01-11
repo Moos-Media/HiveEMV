@@ -252,8 +252,13 @@ cu_set_precompiled_headers(${PROJECT_NAME}_static ${PCH_HEADER_NAME})
 # Additional compile definitions
 target_compile_definitions(${PROJECT_NAME}_static PRIVATE RESOURCES_ROOT_DIR="${HIVE_RESOURCES_FOLDER}")
 
+set(Qt5QtXml_DIR "C:\\Qt\\5.15.2\\msvc2019_64\\lib\\cmake\\Qt5Xml\\")
+find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Core Xml)
+find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Core Xml)
+
 # Link libraries
-target_link_libraries(${PROJECT_NAME}_static PUBLIC Qt${QT_MAJOR_VERSION}::Widgets Qt${QT_MAJOR_VERSION}::Network Hive_models_static QtMate_static Hive_widget_models_static la_avdecc_controller_cxx ${BUGREPORTER_LINK_LIBRARIES} libmarkdown)
+
+target_link_libraries(${PROJECT_NAME}_static PUBLIC  Qt5::Xml Qt${QT_MAJOR_VERSION}::Widgets Qt${QT_MAJOR_VERSION}::Network Hive_models_static QtMate_static Hive_widget_models_static la_avdecc_controller_cxx ${BUGREPORTER_LINK_LIBRARIES} libmarkdown)
 if(ADD_LINK_LIBS)
 	target_link_libraries(${PROJECT_NAME}_static PUBLIC ${ADD_LINK_LIBS})
 endif()
@@ -284,6 +289,7 @@ if(BUILD_HIVE_APPLICATION)
 	endif()
 
 	# Link libraries
+
 	target_link_libraries(${PROJECT_NAME} PRIVATE ${PROJECT_NAME}_static)
 
 	# Set auto RCC

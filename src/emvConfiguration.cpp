@@ -8,6 +8,8 @@ EmvConfiguration::EmvConfiguration(QDomNode _parent)
 
 EmvConfiguration::EmvConfiguration(){}
 
+
+//--------------------------------------------------------------------------------- Public Getters
 QString EmvConfiguration::getLocaleText(QString langiden, int index1, int index2)
 {
     //Check if language is available
@@ -25,6 +27,30 @@ QString EmvConfiguration::getLocaleText(QString langiden, int index1, int index2
     }
 }
 
+QString EmvConfiguration::getConfigurationDescription(QString langiden) {
+	QString key, value;
+
+	QDomNode node = parent.toElement().elementsByTagName("localized_description").at(0);
+
+	if (node.firstChild().hasChildNodes())
+	{
+		int index1, index2;
+		bool status = false;
+
+		index1 = node.firstChild().firstChild().toElement().text().toInt(&status, 16);
+		index2 = node.firstChild().lastChild().toElement().text().toInt();
+
+		value = getLocaleText(langiden, index1, index2);
+	}
+	else
+	{
+		value = node.toElement().text();
+	}
+
+	return value;
+}
+
+//--------------------------------------------------------------------------------- Private Functions
 void EmvConfiguration::xmlsetDictonary()
 {
     allLocales.clear();

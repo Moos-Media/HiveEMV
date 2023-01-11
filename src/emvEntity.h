@@ -3,11 +3,6 @@
 
 #include <QObject>
 #include "emvConfiguration.h"
-#include "C://Qt/5.15.2/msvc2019_64/include/QtXml/qdom.h"
-#include "C://Qt/5.15.2/msvc2019_64/include/QtXml/qtxml-config.h"
-#include "C://Qt/5.15.2/msvc2019_64/include/QtXml/qtxmlglobal.h"
-#include "C://Qt/5.15.2/msvc2019_64/include/QtXml/qtxmlversion.h"
-#include "C://Qt/5.15.2/msvc2019_64/include/QtXml/qxml.h"
 
 
 
@@ -36,12 +31,18 @@ public:
     int getCurrentConfiguration();
     QString getVendorName();
     QString getModelName();
+	QString getConfigurationDescription(int index);
+
 
     //Entity Locale Getter
     QString getLocale(int index1, int index2);
     QString getLocale(QString locale, int index1, int index2);
 
 
+	//Setters
+	void changeLanguage(QString _lang);
+
+	
 
 
 
@@ -51,10 +52,13 @@ private:
     QMap<QString, QString> entityData;
     EmvConfiguration entityConfigurations[100];
 
-    QDomElement xmlReadFile(QString _filename);
+    QDomElement xmlGetRootFromFile(QString _filename);
     void xmlsetEntityMetaData();
     void xmlsetConfigurations();
     void xmlReadStringFromNode(QDomElement node);
+
+	QString getEntityDataString(QString _key);
+		int getEntityDataInt(QString _key);
 
 
 };

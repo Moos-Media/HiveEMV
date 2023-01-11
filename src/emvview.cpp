@@ -1,6 +1,11 @@
 #include "emvview.h"
 #include "emvMixer.h"
+#include <QXmlStreamReader>
+#include <QFile>
+#include <QDebug>
+#include <QCoreApplication>
 #include "emvEntity.h"
+
 
 EmvView::EmvView(QWidget *parent)
 	: QWidget(parent)
@@ -11,8 +16,6 @@ EmvView::EmvView(QWidget *parent)
 	QObject::connect(configurationPicker, SIGNAL(currentIndexChanged(int)), this, SLOT(resetView(false)));
 	QObject::connect(configurationChangeButton, SIGNAL(clicked()), this, SLOT(changeConfigurationClicked()));
 	tabWidget->removeTab(0);
-
-	//EmvEntity myEntity = EmvEntity();
 	
 }
 
@@ -104,7 +107,9 @@ void EmvView::openFile() {
 	QString fileName = QFileDialog::getOpenFileName(this, "Open Entity XML", "C://");
 	qCritical() << fileName << "FILENAME";
 
-	//entity = EmvEntity(fileName, "EN");
+	myEntity = EmvEntity(fileName, "DE");
 
-	//entityLabel->text(entity.getEntityName);
+	entityLabel->setText(myEntity.getConfigurationDescription());
+
+
 }

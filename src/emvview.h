@@ -12,6 +12,8 @@ public:
 	EmvView(QWidget *parent = nullptr);
 	~EmvView();
 
+	EmvEntity myEntity;
+
 	QPushButton* button;
 
 	QString nameTag;

@@ -23,6 +23,8 @@
 #include "avdecc/helper.hpp"
 #include "internals/config.hpp"
 
+#include "emvview.h"
+
 #include <hive/modelsLibrary/controllerManager.hpp>
 #include <hive/modelsLibrary/helper.hpp>
 #include <hive/widgetModelsLibrary/entityLogoCache.hpp>
@@ -138,6 +140,7 @@ DiscoveredEntitiesView::DiscoveredEntitiesView(QWidget* parent)
 				auto* identify{ static_cast<QAction*>(nullptr) };
 				auto* dumpFullEntity{ static_cast<QAction*>(nullptr) };
 				auto* dumpEntityModel{ static_cast<QAction*>(nullptr) };
+				auto* emv{ static_cast<QAction*>(nullptr) };
 
 				if (isAemSupported)
 				{
@@ -197,6 +200,9 @@ DiscoveredEntitiesView::DiscoveredEntitiesView(QWidget* parent)
 					}
 					{
 						inspect = menu.addAction("Inspect Entity Model...");
+					}
+					{
+						emv = menu.addAction("Entity Model Viewer...");
 					}
 					{
 						getLogo = menu.addAction("Retrieve Entity Logo");
@@ -260,6 +266,14 @@ DiscoveredEntitiesView::DiscoveredEntitiesView(QWidget* parent)
 						inspector->setControlledEntityID(entityID);
 						inspector->restoreGeometry(_inspectorGeometry);
 						inspector->show();
+					}
+					else if (action == emv)
+					{
+						auto* emv = new EmvView;
+						emv->setAttribute(Qt::WA_DeleteOnClose);
+						emv->setControlledEntityID(entityID);
+						emv->restoreGeometry(_inspectorGeometry);
+						emv->show();
 					}
 					else if (action == getLogo)
 					{

@@ -22,6 +22,7 @@ set(CONFIGURE_IN_FILES
 	internals/config.hpp.in
 )
 
+
 if(WIN32)
 	configure_file(
 		${HIVE_RESOURCES_FOLDER}/win32/Info.rc.in
@@ -126,6 +127,11 @@ set(HEADER_FILES_COMMON
 	streamFormatComboBox.hpp
 	visibilitySettings.hpp
 	listViewSelectionToMatrixModelController.hpp
+	emvView.h
+	emvMixer.h
+	emvUtils.h
+	emvConfiguration.h
+	emvEntity.h
 )
 
 set(SOURCE_FILES_COMMON
@@ -193,6 +199,11 @@ set(SOURCE_FILES_COMMON
 	nodeVisitor.cpp
 	windowsNpfHelper.cpp
 	listViewSelectionToMatrixModelController.cpp
+	emvview.cpp
+	emvMixer.cpp
+	emvUtils.cpp
+	emvConfiguration.cpp
+	emvEntity.cpp
 )
 
 set(UI_FILES_COMMON
@@ -206,6 +217,8 @@ set(UI_FILES_COMMON
 	firmwareUploadDialog.ui
 	multiFirmwareUpdateDialog.ui
 	mainWindow.ui
+	emvview.ui
+	emvMixer.ui
 )
 
 set(SOURCE_FILES_APP

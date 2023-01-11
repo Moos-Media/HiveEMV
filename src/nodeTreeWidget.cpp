@@ -1451,7 +1451,7 @@ class VisitControlLinearValues final : public NodeTreeWidgetPrivate::VisitContro
 			auto* valueItem = new QTreeWidgetItem(item);
 			valueItem->setText(0, QString("Value %1").arg(valNumber));
 
-			self->addTextItem(valueItem, "Minimum", val.minimum);
+			self->addTextItem(valueItem, "Minimumanme", val.minimum);
 			self->addTextItem(valueItem, "Maximum", val.maximum);
 			self->addTextItem(valueItem, "Step", val.step);
 			self->addTextItem(valueItem, "Default Value", val.defaultValue);

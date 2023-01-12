@@ -1,6 +1,7 @@
 #include "emvUtils.h"
 #include <iostream>
 #include <QDebug>
+#include <QtXml>
 
 int ownMap(double n, double start1, double stop1, double start2, double stop2)
 {
@@ -58,4 +59,25 @@ int panMapping(string input) {
         output = ownMap(stoi(value), 0, 100, 50, 100);
 }
     return output;
+}
+
+QList<int> getIndexesFromNode(QDomElement node)
+{
+	QList<int> indexes;
+	QList<int> wrong;
+	wrong.append(0);
+	wrong.append(0);
+	bool temp = false;
+	indexes.append(node.firstChild().firstChild().toElement().text().toInt(&temp, 16));
+	indexes.append(node.firstChild().lastChild().toElement().text().toInt());
+
+	if (temp)
+		return indexes;
+	else
+		return wrong;
+}
+
+QString getStringByTagName(QDomElement parent, QString _name)
+{
+	return parent.elementsByTagName(_name).at(0).toElement().text();
 }

@@ -2,18 +2,14 @@
 
 EmvEntity::EmvEntity(QString _filename, QString _language)
 {
-	//Setup empty Configs
-    for(int i = 0; i<100; ++i)
-    {
-        entityConfigurations[i] = EmvConfiguration();
-    }
+	qDebug() << "HERE?!?!";
 
 	//Set Language
 	changeLanguage(_language);
 
 	//Read XML File
 	root = xmlGetRootFromFile(_filename);
-
+	qDebug() << "everythings fine";
 	//Read Configs first to get Locale Data Set
     xmlsetConfigurations();
 
@@ -114,6 +110,11 @@ QString EmvEntity::getConfigurationDescription(int index)
 	return entityConfigurations[index].getConfigurationDescription(language);
 }
 
+EmvConfiguration EmvEntity::getConfiguration(int index)
+{
+	return entityConfigurations[index];
+}
+
 QString EmvEntity::getLocale(int index1, int index2)
 {
 	return getLocale(language, index1, index2);
@@ -179,7 +180,7 @@ QDomElement EmvEntity::xmlGetRootFromFile(QString _filename)
                qCritical() << "Error: Open file ";
                return entity;
             }
-            qDebug() << file.isReadable();
+            //qDebug() << file.isReadable();
             file.close();
     }
 
@@ -214,8 +215,8 @@ void EmvEntity::xmlsetConfigurations()
     QDomNode configurationsRoot = root.elementsByTagName("configurations").at(0);
 
     //Create Config Instances
-    for (int i = 0; i < configurationsRoot.childNodes().count(); ++i) {
-        entityConfigurations[i] = EmvConfiguration(configurationsRoot.childNodes().at(i));
+	for (int i = 0; i < configurationsRoot.toElement().elementsByTagName("configuration").count(); ++i) {
+		entityConfigurations.insert(i, EmvConfiguration(configurationsRoot.childNodes().at(i)));
     }
 }
 

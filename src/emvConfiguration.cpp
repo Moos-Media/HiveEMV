@@ -1,9 +1,13 @@
 #include "emvConfiguration.h"
+#include <QDebug>
 
 EmvConfiguration::EmvConfiguration(QDomNode _parent)
 {
     parent = _parent;
+	xmlsetControls();
+	xmlsetJacks();
     xmlsetDictonary(); //Has to be first to set up locales
+	
 }
 
 EmvConfiguration::EmvConfiguration(){}
@@ -50,6 +54,13 @@ QString EmvConfiguration::getConfigurationDescription(QString langiden) {
 	return value;
 }
 
+EmvControl EmvConfiguration::getControl(int index) {
+	return controls[index];
+}
+
+EmvJack EmvConfiguration::getJack(QString dir, int index) {
+	return (dir.toUpper() == "IN") ? input[index] : output[index];
+}
 //--------------------------------------------------------------------------------- Private Functions
 void EmvConfiguration::xmlsetDictonary()
 {
@@ -94,4 +105,55 @@ void EmvConfiguration::xmlsetDictonary()
         //Save Locale Set to dictionary
         allLocales.insert(identifier, localeSet);
     }
+}
+
+void EmvConfiguration::xmlsetControls() {
+
+	//Get Total amount of controls to find last occurence
+	int lastNode = parent.toElement().elementsByTagName("controls").count()-1;
+
+	//Get Root Controls Node via last occurence
+	QDomNode controlRoot = parent.toElement().elementsByTagName("controls").at(lastNode);
+
+	//Get List of all available Controls
+	QDomNodeList controlsList = controlRoot.childNodes();
+
+	//Create Config Instances
+	for (int i = 0; i < controlsList.count(); ++i)
+	{
+		controls.insert(i, EmvControl(controlsList.at(i)));
+	}
+}
+
+void EmvConfiguration::xmlsetJacks() {
+
+	QDomNode jackNode;
+	QDomNodeList jackList;
+	//INPUT JACKS
+	//Get Root Input Jack Node
+	jackNode = parent.toElement().elementsByTagName("input_jacks").at(0);
+
+	//Get List of all available Controls
+	jackList = jackNode.childNodes();
+
+	//Create Config Instances
+	for (int i = 0; i < jackList.count(); ++i)
+	{
+		input.insert(i, EmvJack(jackList.at(i)));
+	}
+
+	//OUTPUT JACKS
+	//Get Root Input Jack Node
+	jackNode = parent.toElement().elementsByTagName("output_jacks").at(0);
+
+	//Get List of all available Controls
+	jackList = jackNode.childNodes();
+
+	//Create Config Instances
+	for (int i = 0; i < jackList.count(); ++i)
+	{
+		output.insert(i, EmvJack(jackList.at(i)));
+	}
+
+
 }

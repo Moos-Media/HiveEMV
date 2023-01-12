@@ -104,12 +104,20 @@ void EmvView::changeConfigurationClicked() {
 }
 
 void EmvView::openFile() {
-	QString fileName = QFileDialog::getOpenFileName(this, "Open Entity XML", "C://");
-	qCritical() << fileName << "FILENAME";
-
+	//QString fileName = QFileDialog::getOpenFileName(this, "Open Entity XML", "G://Meine Ablage/__Studium/9. Semester/Bachelorarbeit/Models");
+	QString fileName = "G:/Meine Ablage/__Studium/9. Semester/Bachelorarbeit/Models/12mic.aemxml";
+	qDebug() << fileName << "FILENAME";
+	
 	myEntity = EmvEntity(fileName, "DE");
 
-	entityLabel->setText(myEntity.getConfigurationDescription());
+	entityLabel->setText(myEntity.getConfigurationDescription(myEntity.getCurrentConfiguration()));
 
+	int desc1, desc2;
 
+	desc1 = myEntity.getConfiguration(0).getJack("OUT", 3).descriptionIndex[0];
+	desc2 = myEntity.getConfiguration(0).getJack("OUT", 3).descriptionIndex[1];
+
+	qDebug() << myEntity.getConfiguration(0).getLocaleText("EN", desc1, desc2) << "Locale Discription";
+	//qDebug() << myEntity.getConfiguration(0).getControl(0).values[0].type;
+	//qDebug() << myEntity.getConfiguration(myEntity.getCurrentConfiguration()).getControl(0).descriptionIndex[0;
 }

@@ -5,8 +5,6 @@
 #include "emvConfiguration.h"
 
 
-
-
 class EmvEntity
 {
 public:
@@ -32,6 +30,7 @@ public:
     QString getVendorName();
     QString getModelName();
 	QString getConfigurationDescription(int index);
+	EmvConfiguration getConfiguration(int index);
 
 
     //Entity Locale Getter
@@ -42,15 +41,11 @@ public:
 	//Setters
 	void changeLanguage(QString _lang);
 
-	
-
-
-
 private:
     QString language;
     QDomDocument document;
     QMap<QString, QString> entityData;
-    EmvConfiguration entityConfigurations[100];
+    QMap<int, EmvConfiguration> entityConfigurations;
 
     QDomElement xmlGetRootFromFile(QString _filename);
     void xmlsetEntityMetaData();

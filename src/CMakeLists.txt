@@ -132,6 +132,7 @@ set(HEADER_FILES_COMMON
 	emvUtils.h
 	emvConfiguration.h
 	emvEntity.h
+	emvClasses.h
 )
 
 set(SOURCE_FILES_COMMON
@@ -204,6 +205,7 @@ set(SOURCE_FILES_COMMON
 	emvUtils.cpp
 	emvConfiguration.cpp
 	emvEntity.cpp
+	emvClasses.cpp
 )
 
 set(UI_FILES_COMMON

@@ -31,7 +31,7 @@ public:
 
 private slots:
 	void addMixer();
-	void resetView(bool);
+	void resetView();
 	void changeConfigurationClicked();
 	void openFile();
 

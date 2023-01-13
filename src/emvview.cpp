@@ -18,7 +18,6 @@ EmvView::EmvView(bool _isDebug, QWidget * parent)
 		openFilePushButton->setEnabled(true);	
 	}
 
-	QObject::connect(addTabButton, SIGNAL(clicked()), this, SLOT(addMixer()));
 	QObject::connect(openFilePushButton, SIGNAL(clicked()), this, SLOT(openFile()));
 	QObject::connect(configurationPicker, SIGNAL(currentIndexChanged(int)), this, SLOT(resetView(false)));
 	QObject::connect(configurationChangeButton, SIGNAL(clicked()), this, SLOT(changeConfigurationClicked()));
@@ -28,18 +27,6 @@ EmvView::EmvView(bool _isDebug, QWidget * parent)
 
 EmvView::~EmvView()
 {}
-
-void EmvView::addMixer()
-{
-
-	QString mixerName = getEntityName();
-	
-	QString mixerAmount = Ui_EmvViewClass::amount->text();
-	std::string temp = mixerAmount.toStdString();
-	int amount = stoi(temp);
-	//EmvMixer* newMixer = new EmvMixer(mixerName, amount, controlledEntityID);
-	//tabWidget->addTab(newMixer, mixerName);
-}
 
 void EmvView::addJacksViews() {
 	//IN
@@ -104,37 +91,29 @@ void EmvView::updateConfigurationPicker()
 	configurationPicker->addItem("Eins");
 	configurationPicker->addItem("Zwei");
 
-	resetView(true);
+	resetView();
 }
 
-void EmvView::resetView(bool shownew)
+void EmvView::resetView()
 {
 	int tabAmount = tabWidget->count();
 	for (int i = 0; i < tabAmount; i++)
 	{
 		tabWidget->removeTab(0);
-	}
-	if (shownew)
-	{
-		int currentSelection = configurationPicker->currentIndex();
-
-		for (int i = 0; i < currentSelection; i++)
-		{
-			addMixer();
-		}
-	}
-	
+	}	
 }
 
 void EmvView::changeConfigurationClicked() {
 	//TODO:: Change Config
 
-	resetView(true);
+	resetView();
 }
 
 void EmvView::openFile() {
 	QString fileName = QFileDialog::getOpenFileName(this, "Open Entity XML", "G://Meine Ablage/__Studium/9. Semester/Bachelorarbeit/Models");
 	//QString fileName = "G:/Meine Ablage/__Studium/9. Semester/Bachelorarbeit/Models/12mic.aemxml";
+
+	resetView();
 
 	// Get Entity
 	myEntity = EmvEntity(fileName, "DE");
@@ -158,6 +137,7 @@ void EmvView::openFile() {
 
 	addJacksViews();
 
+	/*
 	for (int i = 0; i < 30; ++i)
 	{
 		int index1 = myEntity.getCurrentConfiguration().getAudioUnit(0).controls[i].descriptionIndex[0];
@@ -165,7 +145,9 @@ void EmvView::openFile() {
 		qDebug() << myEntity.getLocale(index1, index2) << " control " << i;
 	}
 	qDebug() << myEntity.getCurrentConfiguration().getAudioUnit(0).controlsCount << "controls count";
-
+	*/
 	//qDebug() << myEntity.getConfiguration(0).getControl(0).values[0].type;
 	//qDebug() << myEntity.getConfiguration(myEntity.getCurrentConfiguration()).getControl(0).descriptionIndex[0;
 }
+
+void EmvView::addMixer() {}

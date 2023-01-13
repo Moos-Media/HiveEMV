@@ -122,6 +122,9 @@ void EmvConfiguration::xmlsetControls() {
 	int lastNode = parent.toElement().elementsByTagName("controls").count()-1;
 
 	//Get Root Controls Node via last occurence
+	if (lastNode < 0)
+		return;
+
 	QDomNode controlRoot = parent.toElement().elementsByTagName("controls").at(lastNode);
 
 	//Get List of all available Controls
@@ -177,6 +180,9 @@ void EmvConfiguration::xmlsetAudioUnits() {
 
 	//Get List of all available Controls
 	audioUnitsList = audioUnitsNode.toElement().elementsByTagName("audio_unit");
+
+	if (audioUnitsList.count() < 1)
+		return;
 
 	//Create Config Instances
 	for (int i = 0; i < audioUnitsList.count(); ++i)

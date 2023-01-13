@@ -84,7 +84,7 @@ QString getStringByTagName(QDomElement parent, QString _name)
 
 double getSamplingRateFromNode(QDomElement node) {
 	int pull, base;
-	double multiplier;
+	double multiplier = 1.0;
 	bool temp;
 
 	pull = node.firstChild().toElement().text().toInt();
@@ -111,7 +111,7 @@ double getSamplingRateFromNode(QDomElement node) {
 			multiplier = 1/8;
 			break;
 		default:
-			multiplier = -1.0;
+			multiplier = 1.0;
 			break;
 	}
 

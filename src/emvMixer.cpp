@@ -399,7 +399,7 @@ void EmvMixer::addMetaData() {
 		outputText.append(capabilites.at(i)).append(", ");
 	}
 	outputText.chop(2);
-	outputText.append("Streams");
+	outputText.append(" Streams");
 	talkerCapabilities->setText(outputText);
 
 	streamMaxSinks->setText(QString::number(myEntity->getMaxStreamSinks()));

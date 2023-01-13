@@ -9,7 +9,8 @@ class EmvEntity
 {
 public:
 	EmvEntity(QString _filename, QString _language = "en");
-	EmvEntity();
+	EmvEntity(la::avdecc::UniqueIdentifier _entityID);
+	EmvEntity::EmvEntity();
     QDomElement root;
 
     //Entity MetaData Getters
@@ -44,6 +45,9 @@ public:
 	void changeLanguage(QString _lang);
 
 private:
+	la::avdecc::UniqueIdentifier controlledEntiyID;
+
+
     QString language;
     QDomDocument document;
     QMap<QString, QString> entityData;

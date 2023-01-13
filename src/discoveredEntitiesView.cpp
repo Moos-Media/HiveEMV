@@ -269,7 +269,8 @@ DiscoveredEntitiesView::DiscoveredEntitiesView(QWidget* parent)
 					}
 					else if (action == emv)
 					{
-						auto* emv = new EmvView(false);
+						auto* emv = new EmvView();
+						emv->setDebug(false);
 						emv->setAttribute(Qt::WA_DeleteOnClose);
 						emv->setControlledEntityID(entityID);
 						emv->restoreGeometry(_inspectorGeometry);

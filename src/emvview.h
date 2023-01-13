@@ -9,7 +9,7 @@ class EmvView : public QWidget, public Ui::EmvViewClass
 	Q_OBJECT
 
 public:
-	EmvView(bool _isDebug = "false", QWidget* parent = nullptr);
+	EmvView(QWidget* parent = nullptr);
 	~EmvView();
 
 	EmvEntity myEntity;
@@ -26,6 +26,7 @@ public:
 	QString getEntityName();
 
 	void addJacksViews();
+	void setDebug(bool _isDebug);
 	
 
 

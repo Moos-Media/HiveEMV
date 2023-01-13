@@ -1,7 +1,7 @@
-#include "emvUtils.h"
 #include <iostream>
 #include <QDebug>
 #include <QtXml>
+#include "emvUtils.h"
 
 int ownMap(double n, double start1, double stop1, double start2, double stop2)
 {
@@ -116,4 +116,35 @@ double getSamplingRateFromNode(QDomElement node) {
 	}
 
 	return base * multiplier;
+}
+
+QString convertCapabilitiesDecToHexString(int input) {
+	// Basic structure found on:
+	// www.educative.io/answers/hot-to-convert-a-number-from-decimal-to-hexadecimal-in-cpp
+	int remainder, product = 1;
+	std::string hex_dec = "";
+	while (input != 0)
+	{
+		remainder = input % 16;
+		char ch;
+		if (remainder >= 10)
+			ch = remainder + 55;
+		else
+			ch = remainder + 48;
+		hex_dec += ch;
+
+		input = input / 16;
+		product *= 10;
+	}
+	std::reverse(hex_dec.begin(), hex_dec.end());
+	QString temp = QString::fromStdString(hex_dec);
+	int missing = 4 - temp.length();
+	QString output = "";
+
+	//Make sure, output String is four characters long
+	for (int i = 0; i < missing; ++i)
+	{
+		output.append("0");
+	}
+	return output.append(temp);
 }

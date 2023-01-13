@@ -7,10 +7,10 @@
 #include "emvEntity.h"
 
 
-EmvView::EmvView(bool _isDebug, QWidget * parent)
+EmvView::EmvView(QWidget * parent)
 	: QWidget(parent)
 {
-	isDebug = _isDebug;
+	isDebug = true;
 	setupUi(this);
 
 	if (isDebug)
@@ -55,6 +55,8 @@ void EmvView::setControlledEntityID(la::avdecc::UniqueIdentifier const entityID)
 	//Save Entity ID
 	controlledEntityID = entityID;
 
+	
+
 	//Update Titles
 	setWindowTitle(getEntityName());
 	entityLabel->setText(getEntityName());
@@ -62,6 +64,9 @@ void EmvView::setControlledEntityID(la::avdecc::UniqueIdentifier const entityID)
 	//Update Window
 	updateConfigurationPicker();
 
+	myEntity = EmvEntity(controlledEntityID);
+	EmvMixer* metaData = new EmvMixer(&myEntity, "METADATA", this);
+	tabWidget->addTab(metaData, "Entity Information");
 }
 
 QString EmvView::getEntityName()
@@ -151,3 +156,10 @@ void EmvView::openFile() {
 }
 
 void EmvView::addMixer() {}
+
+void EmvView::setDebug(bool _isDebug) {
+	isDebug = _isDebug;
+
+	if (!isDebug)
+		openFilePushButton->setEnabled(false);
+}

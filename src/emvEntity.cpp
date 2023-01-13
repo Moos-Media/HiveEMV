@@ -1,4 +1,7 @@
 #include "emvEntity.h"
+#include "emvUtils.h"
+
+EmvEntity::EmvEntity(){};
 
 EmvEntity::EmvEntity(QString _filename, QString _language)
 {
@@ -16,7 +19,40 @@ EmvEntity::EmvEntity(QString _filename, QString _language)
 
 }
 
-EmvEntity::EmvEntity(){}
+EmvEntity::EmvEntity(la::avdecc::UniqueIdentifier _entityID)
+{
+	auto& manager = hive::modelsLibrary::ControllerManager::getInstance();
+	auto controlledEntity = manager.getControlledEntity(_entityID);
+
+	if (controlledEntity)
+	{
+		la::avdecc::controller::model::ConfigurationNode configurationNode;
+		try
+		{
+			configurationNode = controlledEntity->getCurrentConfigurationNode();
+		}
+		catch (la::avdecc::controller::ControlledEntity::Exception const&)
+		{
+			return;
+		}
+		auto actEntity = controlledEntity->getEntity();
+
+		entityData.insert("entity_name", hive::modelsLibrary::helper::entityName(*controlledEntity));
+		entityData.insert("vendor_name", hive::modelsLibrary::helper::getVendorName(_entityID));
+		entityData.insert("group_name", hive::modelsLibrary::helper::groupName(*controlledEntity));
+		entityData.insert("entity_id", hive::modelsLibrary::helper::uniqueIdentifierToString(_entityID));
+		entityData.insert("entity_model_id", QString::number(actEntity.getEntityModelID(), 16));
+		entityData.insert("talker_stream_sources", QString::number(actEntity.getTalkerStreamSources()));
+		entityData.insert("listener_stream_sinks", QString::number(actEntity.getListenerStreamSinks()));
+		entityData.insert("talker_capabilities", convertCapabilitiesDecToHexString(actEntity.getTalkerCapabilities().value()));
+		entityData.insert("listener_capabilities", convertCapabilitiesDecToHexString(actEntity.getListenerCapabilities().value()));
+		entityData.insert("controller_capabilities", convertCapabilitiesDecToHexString(actEntity.getControllerCapabilities().value()));
+		entityData.insert("entity_capabilities", convertCapabilitiesDecToHexString(actEntity.getEntityCapabilities().value()));
+		if (actEntity.getAssociationID().has_value())
+			entityData.insert("association_id", QString::number(actEntity.getAssociationID().value(), 16));
+		
+	}
+}
 
 //---------------------------------------------------------------------------------------------------------------------------------- External Data Getters
 
@@ -59,7 +95,7 @@ QStringList EmvEntity::getListenerCapabilities()
 bool EmvEntity::canBeController()
 {
 	if (entityData.contains("controller_capabilities"))
-		return (entityData["controller_capabilities"] == "00000000") ? false : true;
+		return (entityData["controller_capabilities"].toInt() == 0) ? false : true;
 	else
 		return false;
 }

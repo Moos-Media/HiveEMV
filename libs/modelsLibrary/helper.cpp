@@ -240,6 +240,7 @@ QString getVendorName(la::avdecc::UniqueIdentifier const entityID) noexcept
 		s_oui24ToName.emplace(std::make_pair(0x000130, "Extreme Networks, Inc."));
 		s_oui24ToName.emplace(std::make_pair(0xF46E95, "Extreme Networks, Inc."));
 		s_oui24ToName.emplace(std::make_pair(0x784501, "Biamp Systems"));
+		s_oui24ToName.emplace(std::make_pair(0x480BB2, "RME Audio"));
 	}
 
 	// First search in OUI-24

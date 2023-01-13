@@ -2,14 +2,12 @@
 
 EmvEntity::EmvEntity(QString _filename, QString _language)
 {
-	qDebug() << "HERE?!?!";
-
 	//Set Language
 	changeLanguage(_language);
 
 	//Read XML File
 	root = xmlGetRootFromFile(_filename);
-	qDebug() << "everythings fine";
+
 	//Read Configs first to get Locale Data Set
     xmlsetConfigurations();
 
@@ -42,9 +40,10 @@ int EmvEntity::getMaxStreamSources()
 	return getEntityDataInt("talker_stream_sources");
 }
 
-QString EmvEntity::getTalkerCapabilities()
+QStringList EmvEntity::getTalkerCapabilities()
 {
-	return getEntityDataString("talker_capabilities");
+	
+	return parseCapabilites(getEntityDataString("talker_capabilities"));
 }
 
 int EmvEntity::getMaxStreamSinks()
@@ -52,9 +51,9 @@ int EmvEntity::getMaxStreamSinks()
 	return getEntityDataInt("listener_stream_sinks");
 }
 
-QString EmvEntity::getListenerCapabilities()
+QStringList EmvEntity::getListenerCapabilities()
 {
-	return getEntityDataString("listener_capabilities");
+	return parseCapabilites(getEntityDataString("listener_capabilities"));
 }
 
 bool EmvEntity::canBeController()
@@ -90,7 +89,7 @@ QString EmvEntity::getSerialNumber()
 	return getEntityDataString("serial_number");
 }
 
-int EmvEntity::getCurrentConfiguration()
+int EmvEntity::getCurrentConfigurationIndex()
 {
 	return getEntityDataInt("current_configuration");
 }
@@ -115,6 +114,11 @@ EmvConfiguration EmvEntity::getConfiguration(int index)
 	return entityConfigurations[index];
 }
 
+EmvConfiguration EmvEntity::getCurrentConfiguration()
+{
+	return entityConfigurations[getCurrentConfigurationIndex()];
+}
+
 QString EmvEntity::getLocale(int index1, int index2)
 {
 	return getLocale(language, index1, index2);
@@ -123,10 +127,14 @@ QString EmvEntity::getLocale(int index1, int index2)
 
 QString EmvEntity::getLocale(QString locale, int index1, int index2)
 {
-	return entityConfigurations[getCurrentConfiguration()].getLocaleText(language, index1, index2);
+	return entityConfigurations[getCurrentConfigurationIndex()].getLocaleText(language, index1, index2);
 }
 
-//---------------------------------------------------------------------------------------------------------------------------------- Internal Data Getters
+int EmvEntity::getConfigurationCount()
+{
+	return entityConfigurations.size();
+}
+	//---------------------------------------------------------------------------------------------------------------------------------- Internal Data Getters
 
 QString EmvEntity::getEntityDataString(QString _key)
 {
@@ -148,6 +156,35 @@ int EmvEntity::getEntityDataInt(QString _key)
 		qCritical() << "Could not convert Sources.";
 	}
 	return maxSources;
+}
+
+QStringList EmvEntity::parseCapabilites(QString rawData) {
+	QStringList output;
+
+	//Check if ATDECC is implemented
+	if (rawData.at(3) != '1')
+		return output;
+
+	//Parse first index
+	QChar firstIndex = rawData.at(0);
+	QChar secondIndex = rawData.at(1);
+
+	if (firstIndex == '8')
+		output.append("Video");
+	if (firstIndex == '4')
+		output.append("Audio");
+	if (firstIndex == '2')
+		output.append("MIDI");
+	if (firstIndex == '1')
+		output.append("SMPTE");
+	if (secondIndex == '8')
+		output.append("Media Clock");
+	if (secondIndex == '4')
+		output.append("Control");
+	if (secondIndex == '2')
+		output.append("Other");
+
+	return output;
 }
 
 //---------------------------------------------------------------------------------------------------------------------------------- Setters

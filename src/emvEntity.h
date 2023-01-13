@@ -8,7 +8,7 @@
 class EmvEntity
 {
 public:
-    EmvEntity(QString _filename, QString _language = "en");
+	EmvEntity(QString _filename, QString _language = "en");
 	EmvEntity();
     QDomElement root;
 
@@ -17,20 +17,22 @@ public:
     QString getEntityModelID();
     QString getEntityCapabilities();
     int getMaxStreamSources();
-    QString getTalkerCapabilities();
+    QStringList getTalkerCapabilities();
     int getMaxStreamSinks();
-    QString getListenerCapabilities();
+	QStringList getListenerCapabilities();
     bool canBeController();
     QString getAssociationID();
     QString getEntityName();
     QString getFirmwareVersion();
     QString getGroupName();
     QString getSerialNumber();
-    int getCurrentConfiguration();
+    int getCurrentConfigurationIndex();
     QString getVendorName();
     QString getModelName();
 	QString getConfigurationDescription(int index);
 	EmvConfiguration getConfiguration(int index);
+	EmvConfiguration getCurrentConfiguration();
+	int getConfigurationCount();
 
 
     //Entity Locale Getter
@@ -54,6 +56,7 @@ private:
 
 	QString getEntityDataString(QString _key);
 		int getEntityDataInt(QString _key);
+	QStringList parseCapabilites(QString rawData);
 
 
 };

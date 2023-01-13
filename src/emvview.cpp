@@ -7,10 +7,17 @@
 #include "emvEntity.h"
 
 
-EmvView::EmvView(QWidget *parent)
+EmvView::EmvView(bool _isDebug, QWidget * parent)
 	: QWidget(parent)
 {
+	isDebug = _isDebug;
 	setupUi(this);
+
+	if (isDebug)
+	{
+		openFilePushButton->setEnabled(true);	
+	}
+
 	QObject::connect(addTabButton, SIGNAL(clicked()), this, SLOT(addMixer()));
 	QObject::connect(openFilePushButton, SIGNAL(clicked()), this, SLOT(openFile()));
 	QObject::connect(configurationPicker, SIGNAL(currentIndexChanged(int)), this, SLOT(resetView(false)));
@@ -30,8 +37,30 @@ void EmvView::addMixer()
 	QString mixerAmount = Ui_EmvViewClass::amount->text();
 	std::string temp = mixerAmount.toStdString();
 	int amount = stoi(temp);
-	EmvMixer* newMixer = new EmvMixer(mixerName, amount, controlledEntityID);
-	tabWidget->addTab(newMixer, mixerName);
+	//EmvMixer* newMixer = new EmvMixer(mixerName, amount, controlledEntityID);
+	//tabWidget->addTab(newMixer, mixerName);
+}
+
+void EmvView::addJacksViews() {
+	//IN
+	QString mixerName = "Input Jacks";
+	QString type = "JACKSIN";
+
+	if (myEntity.getCurrentConfiguration().getJackAmount("IN") != 0)
+	{
+		EmvMixer* newMixer = new EmvMixer(&myEntity, type, this);
+		tabWidget->addTab(newMixer, mixerName);
+	}
+
+	//OUT
+	mixerName = "Output Jacks";
+	type = "JACKSOUT";
+
+	if (myEntity.getCurrentConfiguration().getJackAmount("OUT") != 0)
+	{
+		EmvMixer* newMixer2 = new EmvMixer(&myEntity, type, this);
+		tabWidget->addTab(newMixer2, mixerName);
+	}
 }
 
 void EmvView::setControlledEntityID(la::avdecc::UniqueIdentifier const entityID)
@@ -104,20 +133,39 @@ void EmvView::changeConfigurationClicked() {
 }
 
 void EmvView::openFile() {
-	//QString fileName = QFileDialog::getOpenFileName(this, "Open Entity XML", "G://Meine Ablage/__Studium/9. Semester/Bachelorarbeit/Models");
-	QString fileName = "G:/Meine Ablage/__Studium/9. Semester/Bachelorarbeit/Models/12mic.aemxml";
-	qDebug() << fileName << "FILENAME";
-	
+	QString fileName = QFileDialog::getOpenFileName(this, "Open Entity XML", "G://Meine Ablage/__Studium/9. Semester/Bachelorarbeit/Models");
+	//QString fileName = "G:/Meine Ablage/__Studium/9. Semester/Bachelorarbeit/Models/12mic.aemxml";
+
+	// Get Entity
 	myEntity = EmvEntity(fileName, "DE");
 
-	entityLabel->setText(myEntity.getConfigurationDescription(myEntity.getCurrentConfiguration()));
+	//Change Label
+	QString labelText = "";
+	labelText = labelText.append(myEntity.getVendorName()).append(" ").append(myEntity.getEntityName());
+	entityLabel->setText(labelText);
 
-	int desc1, desc2;
+	//Add Configs to Picker
+	configurationPicker->clear();
+	for (int i = 0; i < myEntity.getConfigurationCount(); ++i)
+	{
+		configurationPicker->addItem(myEntity.getConfigurationDescription(i));
+	}
 
-	desc1 = myEntity.getConfiguration(0).getJack("OUT", 3).descriptionIndex[0];
-	desc2 = myEntity.getConfiguration(0).getJack("OUT", 3).descriptionIndex[1];
+	
 
-	qDebug() << myEntity.getConfiguration(0).getLocaleText("EN", desc1, desc2) << "Locale Discription";
+	EmvMixer* metaData = new EmvMixer(&myEntity, "METADATA", this);
+	tabWidget->addTab(metaData, "Entity Information");
+
+	addJacksViews();
+
+	for (int i = 0; i < 30; ++i)
+	{
+		int index1 = myEntity.getCurrentConfiguration().getAudioUnit(0).controls[i].descriptionIndex[0];
+		int index2 = myEntity.getCurrentConfiguration().getAudioUnit(0).controls[i].descriptionIndex[1];
+		qDebug() << myEntity.getLocale(index1, index2) << " control " << i;
+	}
+	qDebug() << myEntity.getCurrentConfiguration().getAudioUnit(0).controlsCount << "controls count";
+
 	//qDebug() << myEntity.getConfiguration(0).getControl(0).values[0].type;
 	//qDebug() << myEntity.getConfiguration(myEntity.getCurrentConfiguration()).getControl(0).descriptionIndex[0;
 }

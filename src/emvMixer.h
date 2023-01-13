@@ -2,16 +2,19 @@
 
 #include <QWidget>
 #include "ui_emvMixer.h"
+#include "emvEntity.h"
 
 class EmvMixer : public QWidget, public Ui::EmvMixerClass
 {
 	Q_OBJECT
 
 public:
-	EmvMixer(QString type, int amount, la::avdecc::UniqueIdentifier entityID, QWidget *parent = nullptr);
+	EmvMixer(EmvEntity *entity, QString type, QWidget *parent);
 	~EmvMixer();
 
+	EmvEntity* myEntity;
 	QString mixerType;
+	QString headerStyle;
 	int channelAmount;
 	la::avdecc::UniqueIdentifier controlledEntityID;
 
@@ -44,4 +47,7 @@ private:
 	QSlider* levelsSliders[10][10];
 	QCheckBox* muteCheckBoxes[10][10];
 	QLabel* testLabelsPan[10];
+
+	void addJacks(QString _dir);
+	void addMetaData();
 };

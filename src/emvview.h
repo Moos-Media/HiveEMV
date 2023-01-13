@@ -9,7 +9,7 @@ class EmvView : public QWidget, public Ui::EmvViewClass
 	Q_OBJECT
 
 public:
-	EmvView(QWidget *parent = nullptr);
+	EmvView(bool _isDebug = "false", QWidget* parent = nullptr);
 	~EmvView();
 
 	EmvEntity myEntity;
@@ -24,6 +24,8 @@ public:
 
 	void updateConfigurationPicker();
 	QString getEntityName();
+
+	void addJacksViews();
 	
 
 
@@ -34,4 +36,5 @@ private slots:
 	void openFile();
 
 private:
+	bool isDebug;
 };

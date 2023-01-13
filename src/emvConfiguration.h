@@ -13,6 +13,8 @@ public:
 	QString getConfigurationDescription(QString langiden);
 	EmvControl getControl(int index);
 	EmvJack getJack(QString dir, int index);
+	int getJackAmount(QString dir);
+	EmvAudioUnit getAudioUnit(int index);
 
 private:
     QDomNode parent;
@@ -24,9 +26,11 @@ private:
     void xmlsetDictonary();
 	void xmlsetControls();
 	void xmlsetJacks();
+	void xmlsetAudioUnits();
 	QMap<int, EmvControl> controls;
 	QMap<int, EmvJack> input;
 	QMap<int, EmvJack> output;
+	QList<EmvAudioUnit> audioUnits;
 };
 
 #endif // EMVCONFIGURATION_H

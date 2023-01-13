@@ -2,16 +2,24 @@
 #include "emvUtils.h"
 
 
-EmvMixer::EmvMixer(QString type, int amount, la::avdecc::UniqueIdentifier entityID, QWidget *parent)
+
+EmvMixer::EmvMixer(EmvEntity *entity, QString type, QWidget *parent)
 	: QWidget(parent)
 {
 	setupUi(this);
-	la::avdecc::UniqueIdentifier controlledEntityID = entityID;
 
-	mixerType = type;
-	channelAmount = amount;
+	// Setup Header Styling
+	headerStyle = "font-weight: bold; font-size: 8pt; text-align: center;";
 
-	addChannels();
+	myEntity = entity;
+
+	if (type.toUpper() == "METADATA")
+		addMetaData();
+	else if (type.toUpper() == "JACKSIN")
+		addJacks("IN");
+	else if (type.toUpper() == "JACKSOUT")
+		addJacks("OUT");
+	
 }
 
 EmvMixer::~EmvMixer()
@@ -213,4 +221,311 @@ void EmvMixer::addChannels()
 	}
 }
 
+void EmvMixer::addJacks(QString _dir) {	
+	for (int i = 0; i < myEntity->getCurrentConfiguration().getJackAmount(_dir.toUpper()); i++)
+	{
+		int newColumn = mixerArea->columnCount();
+		EmvJack currentJack = myEntity->getCurrentConfiguration().getJack(_dir.toUpper(), i);
 
+		//----------------------------------------------------------------- Jack Title
+		QString jackLabel = myEntity->getLocale(currentJack.descriptionIndex[0], currentJack.descriptionIndex[1]);
+		QLabel* jackHeader = new QLabel(jackLabel);
+		jackHeader->setTextFormat(Qt::RichText);
+		jackHeader->setStyleSheet(headerStyle);
+		jackHeader->setAlignment(Qt::AlignHCenter);
+		mixerArea->addWidget(jackHeader, 0, newColumn, Qt::AlignTop);
+
+		//----------------------------------------------------------------- Jack Image
+		QLabel* picture = new QLabel();
+		QPixmap myMap;
+
+		//Get Jack Image
+		switch (currentJack.type)
+		{
+			case (0):
+				myMap = QPixmap(":/jack_speaker");
+				break;
+			case (1):
+				myMap = QPixmap(":/jack_headphone");
+				break;
+			case (2):
+				myMap = QPixmap(":/jack_microphone");
+				break;
+			case (3):
+				myMap = QPixmap(":/jack_spdif");
+				break;
+			case (4):
+				myMap = QPixmap(":/jack_adat");
+				break;
+			case (5):
+				myMap = QPixmap(":/jack_tdif");
+				break;
+			case (6):
+				myMap = QPixmap(":/jack_madi");
+				break;
+			case (7):
+				myMap = QPixmap(":/jack_unbalanced");
+				break;
+			case (8):
+				myMap = QPixmap(":/jack_balanced");
+				break;
+			case (9):
+				myMap = QPixmap(":/jack_digital");
+				break;
+			case (10):
+				myMap = QPixmap(":/jack_midi");
+				break;
+			case (11):
+				myMap = QPixmap(":/jack_aesebu");
+				break;
+			case (12):
+				myMap = QPixmap(":/jack_composite");
+				break;
+			case (13):
+				myMap = QPixmap(":/jack_svhs");
+				break;
+			case (14):
+				myMap = QPixmap(":/jack_component");
+				break;
+			case (15):
+				myMap = QPixmap(":/jack_dvi");
+				break;
+			case (16):
+				myMap = QPixmap(":/jack_hdmi");
+				break;
+			case (17):
+				myMap = QPixmap(":/jack_udi");
+				break;
+			case (18):
+				myMap = QPixmap(":/jack_displayport");
+				break;
+			case (19):
+				myMap = QPixmap(":/jack_antenna");
+				break;
+			case (20):
+				myMap = QPixmap(":/jack_tuner");
+				break;
+			case (21):
+				myMap = QPixmap(":/jack_ethernet");
+				break;
+			case (22):
+				myMap = QPixmap(":/jack_wifi");
+				break;
+			case (23):
+				myMap = QPixmap(":/jack_usb");
+				break;
+			default:
+				myMap = QPixmap(":/default");
+				break;
+		}
+
+		//Add Image to Area
+		picture->setPixmap(myMap.scaledToWidth(50));
+		picture->setAlignment(Qt::AlignHCenter);
+		mixerArea->addWidget(picture, 1, newColumn, Qt::AlignTop);
+
+		//----------------------------------------------------------------- Jack Flags
+
+		bool temp;
+		QString flagtext;
+		switch (currentJack.flags.toInt(&temp, 16))
+		{
+			case (1):
+				flagtext = "Is Clock Source";
+				break;
+			case (2):
+				flagtext = "Is Captive";
+				break;
+			default:
+				flagtext = "No flags";
+				break;
+		}
+
+		QLabel* jackFlags = new QLabel(flagtext);
+		jackFlags->setAlignment(Qt::AlignHCenter);
+		mixerArea->addWidget(jackFlags, 2, newColumn, Qt::AlignTop);
+	}
+}
+
+void EmvMixer::addMetaData() {
+	//Create all Labels
+	QLabel *entityID = new QLabel();
+	QLabel *entityIDHeader = new QLabel();
+	QLabel* entityModelID = new QLabel();
+	QLabel* entityModelIDHeader = new QLabel();
+	QLabel* entityCapabilities = new QLabel();
+	QLabel* entityCapabilitiesHeader = new QLabel();
+	QLabel* streamMaxSources = new QLabel();
+	QLabel* streamMaxSourcesHeader = new QLabel();
+	QLabel* talkerCapabilities = new QLabel();
+	QLabel* talkerCapabilitiesHeader = new QLabel();
+	QLabel* streamMaxSinks = new QLabel();
+	QLabel* streamMaxSinksHeader = new QLabel();
+	QLabel* listenerCapabilities = new QLabel();
+	QLabel* listenerCapabilitiesHeader = new QLabel();
+	QLabel* controllerCapabilites = new QLabel();
+	QLabel* controllerCapabilitesHeader = new QLabel();
+	QLabel* associationID = new QLabel();
+	QLabel* associationIDHeader = new QLabel();
+	QLabel* entityName = new QLabel();
+	QLabel* entityNameHeader = new QLabel();
+	QLabel* vendorName = new QLabel();
+	QLabel* vendorNameHeader = new QLabel();
+	QLabel* modelName = new QLabel();
+	QLabel* modelNameHeader = new QLabel();
+	QLabel* firmwareVersion = new QLabel();
+	QLabel* firmwareVersionHeader = new QLabel();
+	QLabel* groupName = new QLabel();
+	QLabel* groupNameHeader = new QLabel();
+	QLabel* serialNumber = new QLabel();
+	QLabel* serialNumberHeader = new QLabel();
+	QLabel* currentConfig = new QLabel();
+	QLabel* currentConfigHeader = new QLabel();
+	QStringList capabilites;
+	QString outputText;
+
+
+	//Set Data Labels
+	entityID->setText(myEntity->getEntityID());
+	entityModelID->setText(myEntity->getEntityModelID());
+	entityCapabilities->setText(myEntity->getEntityCapabilities());
+	streamMaxSources->setText(QString::number(myEntity->getMaxStreamSources()));
+
+	capabilites = myEntity->getTalkerCapabilities();
+	outputText.append("Can be Source of: ");
+
+	for (int i = 0; i < capabilites.size(); ++i)
+	{
+		outputText.append(capabilites.at(i)).append(", ");
+	}
+	outputText.chop(2);
+	outputText.append("Streams");
+	talkerCapabilities->setText(outputText);
+
+	streamMaxSinks->setText(QString::number(myEntity->getMaxStreamSinks()));
+
+	capabilites = myEntity->getListenerCapabilities();
+	outputText = "";
+	outputText.append("Can be sink of: ");
+
+	for (int i = 0; i < capabilites.size(); ++i)
+	{
+		outputText.append(capabilites.at(i)).append(", ");
+	}
+	outputText.chop(2);
+	outputText.append(" Streams");
+
+	listenerCapabilities->setText(outputText);
+
+	if (myEntity->canBeController())
+		controllerCapabilites->setText("Can be controller");
+	else
+		controllerCapabilites->setText("Can't be controller");
+	associationID->setText(myEntity->getAssociationID());
+	entityName->setText(myEntity->getEntityName());
+	vendorName->setText(myEntity->getVendorName());
+	modelName->setText(myEntity->getModelName());
+	firmwareVersion->setText(myEntity->getFirmwareVersion());
+	groupName->setText(myEntity->getGroupName());
+	serialNumber->setText(myEntity->getSerialNumber());
+	currentConfig->setText(myEntity->getConfigurationDescription(myEntity->getCurrentConfigurationIndex()));
+
+	//Set Header Labels
+	entityIDHeader->setText("Entity ID:");
+	entityModelIDHeader->setText("Entity Model ID:");
+	entityCapabilitiesHeader->setText("Entity Capabilities:");
+	streamMaxSourcesHeader->setText("Maximum number of Stream Sources:");
+	talkerCapabilitiesHeader->setText("Talker Capabilities:");
+	streamMaxSinksHeader->setText("Maximum number of Stream Sinks:");
+	listenerCapabilitiesHeader->setText("Listener Capabilites:");
+	controllerCapabilitesHeader->setText("Controller Capabilities:");
+	associationIDHeader->setText("Association ID:");
+	entityNameHeader->setText("Entity Name:");
+	vendorNameHeader->setText("Vendor Name:");
+	modelNameHeader->setText("Model Name:");
+	firmwareVersionHeader->setText("Firmware Version:");
+	groupNameHeader->setText("Group Name:");
+	serialNumberHeader->setText("Serial Number:");
+	currentConfigHeader->setText("Currently Selected Configuration");
+
+	//Set Styling
+	headerStyle = "font-weight: bold; font-size: 8pt;";
+	entityIDHeader->setStyleSheet(headerStyle);
+	entityModelIDHeader->setStyleSheet(headerStyle);
+	entityCapabilitiesHeader->setStyleSheet(headerStyle);
+	streamMaxSourcesHeader->setStyleSheet(headerStyle);
+	talkerCapabilitiesHeader->setStyleSheet(headerStyle);
+	streamMaxSinksHeader->setStyleSheet(headerStyle);;
+	listenerCapabilitiesHeader->setStyleSheet(headerStyle);
+	controllerCapabilitesHeader->setStyleSheet(headerStyle);
+	associationIDHeader->setStyleSheet(headerStyle);
+	entityNameHeader->setStyleSheet(headerStyle);
+	vendorNameHeader->setStyleSheet(headerStyle);
+	modelNameHeader->setStyleSheet(headerStyle);
+	firmwareVersionHeader->setStyleSheet(headerStyle);
+	groupNameHeader->setStyleSheet(headerStyle);
+	serialNumberHeader->setStyleSheet(headerStyle);
+	currentConfigHeader->setStyleSheet(headerStyle);
+
+	//Add Labels to Area
+	int row = 0;
+
+	mixerArea->addWidget(entityIDHeader, row, 0);
+	mixerArea->addWidget(entityID, row, 1);
+	++row;
+
+	mixerArea->addWidget(entityModelIDHeader, row, 0);
+	mixerArea->addWidget(entityModelID, row, 1);
+	++row;
+
+	mixerArea->addWidget(entityCapabilitiesHeader, row, 0);
+	mixerArea->addWidget(entityCapabilities, row, 1);
+	++row;
+
+	mixerArea->addWidget(streamMaxSourcesHeader, row, 0);
+	mixerArea->addWidget(streamMaxSources, row, 1);
+	++row;
+
+	mixerArea->addWidget(talkerCapabilitiesHeader, row, 0);
+	mixerArea->addWidget(talkerCapabilities, row, 1);
+	++row;
+
+	mixerArea->addWidget(streamMaxSinksHeader, row, 0);
+	mixerArea->addWidget(streamMaxSinks, row, 1);
+	++row;
+
+	mixerArea->addWidget(listenerCapabilitiesHeader, row, 0);
+	mixerArea->addWidget(listenerCapabilities, row, 1);
+	++row;
+
+	mixerArea->addWidget(controllerCapabilitesHeader, row, 0);
+	mixerArea->addWidget(controllerCapabilites, row, 1);
+	++row;
+
+	mixerArea->addWidget(associationIDHeader, row, 0);
+	mixerArea->addWidget(associationID, row, 1);
+	++row;
+
+	mixerArea->addWidget(entityNameHeader, row, 0);
+	mixerArea->addWidget(entityName, row, 1);
+	++row;
+
+	mixerArea->addWidget(vendorNameHeader, row, 0);
+	mixerArea->addWidget(vendorName, row, 1);
+	++row;
+
+	mixerArea->addWidget(modelNameHeader, row, 0);
+	mixerArea->addWidget(modelName, row, 1);
+	++row;
+
+	mixerArea->addWidget(firmwareVersionHeader, row, 0);
+	mixerArea->addWidget(firmwareVersion, row, 1);
+	++row;
+
+	mixerArea->addWidget(serialNumberHeader, row, 0);
+	mixerArea->addWidget(serialNumber, row, 1);
+	++row;
+
+	mixerArea->addWidget(currentConfigHeader, row, 0);
+	mixerArea->addWidget(currentConfig, row, 1);
+}

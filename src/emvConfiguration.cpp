@@ -6,6 +6,7 @@ EmvConfiguration::EmvConfiguration(QDomNode _parent)
     parent = _parent;
 	xmlsetControls();
 	xmlsetJacks();
+	xmlsetAudioUnits();
     xmlsetDictonary(); //Has to be first to set up locales
 	
 }
@@ -61,7 +62,15 @@ EmvControl EmvConfiguration::getControl(int index) {
 EmvJack EmvConfiguration::getJack(QString dir, int index) {
 	return (dir.toUpper() == "IN") ? input[index] : output[index];
 }
-//--------------------------------------------------------------------------------- Private Functions
+
+int EmvConfiguration::getJackAmount(QString dir) {
+	return (dir.toUpper() == "IN") ? input.size() : output.size();
+}
+
+EmvAudioUnit EmvConfiguration::getAudioUnit(int index) {
+	return audioUnits[index];
+}
+	//--------------------------------------------------------------------------------- Private Functions
 void EmvConfiguration::xmlsetDictonary()
 {
     allLocales.clear();
@@ -156,4 +165,22 @@ void EmvConfiguration::xmlsetJacks() {
 	}
 
 
+}
+
+void EmvConfiguration::xmlsetAudioUnits() {
+	QDomNode audioUnitsNode;
+	QDomNodeList audioUnitsList;
+
+
+	//Get Audio Units Node
+	audioUnitsNode = parent.toElement().elementsByTagName("audio_units").at(0);
+
+	//Get List of all available Controls
+	audioUnitsList = audioUnitsNode.toElement().elementsByTagName("audio_unit");
+
+	//Create Config Instances
+	for (int i = 0; i < audioUnitsList.count(); ++i)
+	{
+		audioUnits.append(EmvAudioUnit(audioUnitsList.at(i)));
+	}
 }

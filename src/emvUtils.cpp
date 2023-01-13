@@ -81,3 +81,39 @@ QString getStringByTagName(QDomElement parent, QString _name)
 {
 	return parent.elementsByTagName(_name).at(0).toElement().text();
 }
+
+double getSamplingRateFromNode(QDomElement node) {
+	int pull, base;
+	double multiplier;
+	bool temp;
+
+	pull = node.firstChild().toElement().text().toInt();
+	base = node.lastChild().toElement().text().toInt(&temp, 16);
+
+	switch (pull)
+	{
+		case (0):
+			multiplier = 1.0;
+			break;
+		case (1):
+			multiplier = 1/1.001;
+			break;
+		case (2):
+			multiplier = 1.001;
+			break;
+		case (3):
+			multiplier = 24/25;
+			break;
+		case (4):
+			multiplier = 25/24;
+			break;
+		case (5):
+			multiplier = 1/8;
+			break;
+		default:
+			multiplier = -1.0;
+			break;
+	}
+
+	return base * multiplier;
+}

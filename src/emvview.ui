@@ -17,32 +17,25 @@
    <item row="1" column="1">
     <widget class="QLabel" name="label">
      <property name="text">
-      <string>TextLabel</string>
+      <string>Choose Configuration:</string>
      </property>
     </widget>
    </item>
-   <item row="5" column="1" colspan="5">
-    <widget class="QLineEdit" name="amount">
-     <property name="text">
-      <string>2</string>
-     </property>
+   <item row="1" column="2" colspan="2">
+    <widget class="QComboBox" name="configurationPicker">
+     <item>
+      <property name="text">
+       <string>Test 1</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Test2</string>
+      </property>
+     </item>
     </widget>
    </item>
-   <item row="4" column="1" colspan="5">
-    <widget class="QLineEdit" name="textEdit">
-     <property name="text">
-      <string>qfewf</string>
-     </property>
-    </widget>
-   </item>
-   <item row="1" column="5">
-    <widget class="QPushButton" name="configurationChangeButton">
-     <property name="text">
-      <string>PushButton</string>
-     </property>
-    </widget>
-   </item>
-   <item row="3" column="1" colspan="5">
+   <item row="3" column="1" colspan="4">
     <widget class="QTabWidget" name="tabWidget">
      <property name="currentIndex">
       <number>0</number>
@@ -71,13 +64,6 @@
      </widget>
     </widget>
    </item>
-   <item row="6" column="1" colspan="5">
-    <widget class="QPushButton" name="addTabButton">
-     <property name="text">
-      <string>Add Tab</string>
-     </property>
-    </widget>
-   </item>
    <item row="0" column="1">
     <widget class="QLabel" name="entityLabel">
      <property name="font">
@@ -88,26 +74,22 @@
       </font>
      </property>
      <property name="text">
-      <string>TextLabel</string>
+      <string>Entity Name</string>
      </property>
     </widget>
    </item>
-   <item row="1" column="2" colspan="2">
-    <widget class="QComboBox" name="configurationPicker">
-     <item>
-      <property name="text">
-       <string>Test 1</string>
-      </property>
-     </item>
-     <item>
-      <property name="text">
-       <string>Test2</string>
-      </property>
-     </item>
+   <item row="1" column="4">
+    <widget class="QPushButton" name="configurationChangeButton">
+     <property name="text">
+      <string>Apply</string>
+     </property>
     </widget>
    </item>
    <item row="0" column="3">
     <widget class="QPushButton" name="openFilePushButton">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
      <property name="text">
       <string>OpenFile</string>
      </property>

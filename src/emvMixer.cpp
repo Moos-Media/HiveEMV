@@ -351,6 +351,20 @@ void EmvMixer::addJacks(QString _dir) {
 		mixerArea->addWidget(jackFlags, newRow, newColumn, Qt::AlignTop);
 		++newRow;
 
+		//----------------------------------------------------------------- Jack Controls
+
+		for (int j = 0; j < currentJack.controlsCount; ++j)
+		{
+			auto currentControl = currentJack.controls[j];
+
+			int indexx = currentControl.descriptionIndex[0];
+			int indexy = currentControl.descriptionIndex[1];
+			mixerArea->addWidget(new QLabel(myEntity->getLocale(indexx, indexy)), newRow, newColumn);
+			++newRow;
+			addControlsToPage(currentControl.controlTypeIndex, newRow, newColumn);
+			++newRow;
+		}
+
 		//----------------------------------------------------------------- Port Controls
 
 		auto portList = myEntity->getCurrentConfiguration().getAudioUnit(0).getExternalPorts(_dir);

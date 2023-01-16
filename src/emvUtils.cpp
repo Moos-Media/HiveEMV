@@ -148,3 +148,79 @@ QString convertCapabilitiesDecToHexString(int input) {
 	}
 	return output.append(temp);
 }
+
+int getControlTypeIndexFromType(QString input)
+{
+	if (input == "90e0f00000000000")
+		return 0;
+	else if (input == "90e0f00000000001")
+		return 1;
+	else if (input == "90e0f00000000002")
+		return 2;
+	else if (input == "90e0f00000000003")
+		return 3;
+	else if (input == "90e0f00000000004")
+		return 4;
+	else if (input == "90e0f00000000005")
+		return 5;
+	else if (input == "90e0f00000000006")
+		return 6;
+	else if (input == "90e0f00000000007")
+		return 7;
+	else if (input == "90e0f00000000008")
+		return 8;
+	else if (input == "90e0f00000000009")
+		return 9;
+	else if (input == "90e0f0000000000a")
+		return 10;
+	else if (input == "90e0f0000000000b")
+		return 11;
+	else if (input == "90e0f0000000000c")
+		return 12;
+	else if (input == "90e0f0000000000d")
+		return 13;
+	else if (input == "90e0f0000000000e")
+		return 14;
+	else if (input == "90e0f0000000000f")
+		return 15;
+	else if (input == "90e0f00000000010")
+		return 16;
+	else if (input == "90e0f00000000011")
+		return 17;
+	else if (input == "90e0f00000000012")
+		return 18;
+	else if (input == "90e0f00000000013")
+		return 19;
+	else if (input == "90e0f00000000014")
+		return 20;
+	else if (input == "90e0f00000000015")
+		return 21;
+	else if (input == "90e0f00000000016")
+		return 22;
+	else if (input == "90e0f00000000017")
+		return 23;
+	else if (input == "90e0f00000000018")
+		return 24;
+	else if (input == "90e0f00000000019")
+		return 25;
+	else if (input == "90e0f0000000001a")
+		return 26;
+	else if (input == "90e0f0000000001b")
+		return 27;
+	else if (input == "90e0f0000000001c")
+		return 28; //-----------------------------------------------
+	else if (input == "90e0f00000010000")
+		return 30;
+	else if (input == "90e0f00000010001")
+		return 31;
+	else if (input == "90e0f00000010002")
+		return 32;
+	else if (input == "90e0f00000010003")
+		return 33;
+	else if (input == "90e0f00000010004")
+		return 34;
+
+	else
+		return -1;
+
+}

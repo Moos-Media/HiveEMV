@@ -14,6 +14,7 @@ public:
 	EmvControl getControl(int index);
 	EmvJack getJack(QString dir, int index);
 	int getJackAmount(QString dir);
+	int getControlsAmount();
 	EmvAudioUnit getAudioUnit(int index);
 
 private:
@@ -28,6 +29,7 @@ private:
 	void xmlsetJacks();
 	void xmlsetAudioUnits();
 	QMap<int, EmvControl> controls;
+	int controlsAmount;
 	QMap<int, EmvJack> input;
 	QMap<int, EmvJack> output;
 	QList<EmvAudioUnit> audioUnits;

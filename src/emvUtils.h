@@ -16,3 +16,5 @@ QString getStringByTagName(QDomElement parent, QString _name);
 double getSamplingRateFromNode(QDomElement node);
 
 QString convertCapabilitiesDecToHexString(int input);
+
+int getControlTypeIndexFromType(QString input);

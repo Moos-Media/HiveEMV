@@ -4,6 +4,7 @@
 EmvConfiguration::EmvConfiguration(QDomNode _parent)
 {
     parent = _parent;
+	controlsAmount = 0;
 	xmlsetControls();
 	xmlsetJacks();
 	xmlsetAudioUnits();
@@ -65,6 +66,13 @@ EmvJack EmvConfiguration::getJack(QString dir, int index) {
 
 int EmvConfiguration::getJackAmount(QString dir) {
 	return (dir.toUpper() == "IN") ? input.size() : output.size();
+}
+
+int EmvConfiguration::getControlsAmount() {
+	if (controlsAmount != 0)
+		return controlsAmount;
+	else
+		return -1;
 }
 
 EmvAudioUnit EmvConfiguration::getAudioUnit(int index) {
@@ -134,6 +142,7 @@ void EmvConfiguration::xmlsetControls() {
 	for (int i = 0; i < controlsList.count(); ++i)
 	{
 		controls.insert(i, EmvControl(controlsList.at(i)));
+		controlsAmount += 1;
 	}
 }
 

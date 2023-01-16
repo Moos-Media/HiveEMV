@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>507</width>
+    <width>668</width>
     <height>885</height>
    </rect>
   </property>
@@ -85,7 +85,7 @@
      </property>
     </widget>
    </item>
-   <item row="0" column="3">
+   <item row="0" column="4">
     <widget class="QPushButton" name="openFilePushButton">
      <property name="enabled">
       <bool>false</bool>
@@ -93,6 +93,25 @@
      <property name="text">
       <string>OpenFile</string>
      </property>
+    </widget>
+   </item>
+   <item row="0" column="2" colspan="2">
+    <widget class="QComboBox" name="languagePicker">
+     <item>
+      <property name="text">
+       <string>English</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Deutsch</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Français</string>
+      </property>
+     </item>
     </widget>
    </item>
   </layout>

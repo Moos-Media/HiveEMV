@@ -37,11 +37,12 @@ EmvEntity::EmvEntity(la::avdecc::UniqueIdentifier _entityID)
 		}
 		auto actEntity = controlledEntity->getEntity();
 
-		entityData.insert("entity_name", hive::modelsLibrary::helper::entityName(*controlledEntity));
-		entityData.insert("vendor_name", hive::modelsLibrary::helper::getVendorName(_entityID));
-		entityData.insert("group_name", hive::modelsLibrary::helper::groupName(*controlledEntity));
+		auto const* const staticModel = controlledEntity->getEntityNode().staticModel;
+		auto const* const dynamicModel = controlledEntity->getEntityNode().dynamicModel;
+
+		entityData.insert("entity_name", hive::modelsLibrary::helper::entityName(*controlledEntity));		entityData.insert("group_name", hive::modelsLibrary::helper::groupName(*controlledEntity));
 		entityData.insert("entity_id", hive::modelsLibrary::helper::uniqueIdentifierToString(_entityID));
-		entityData.insert("entity_model_id", QString::number(actEntity.getEntityModelID(), 16));
+		entityData.insert("entity_model_id", hive::modelsLibrary::helper::uniqueIdentifierToString(actEntity.getEntityModelID()));
 		entityData.insert("talker_stream_sources", QString::number(actEntity.getTalkerStreamSources()));
 		entityData.insert("listener_stream_sinks", QString::number(actEntity.getListenerStreamSinks()));
 		entityData.insert("talker_capabilities", convertCapabilitiesDecToHexString(actEntity.getTalkerCapabilities().value()));
@@ -50,7 +51,11 @@ EmvEntity::EmvEntity(la::avdecc::UniqueIdentifier _entityID)
 		entityData.insert("entity_capabilities", convertCapabilitiesDecToHexString(actEntity.getEntityCapabilities().value()));
 		if (actEntity.getAssociationID().has_value())
 			entityData.insert("association_id", QString::number(actEntity.getAssociationID().value(), 16));
-		
+		entityData.insert("model_name", hive::modelsLibrary::helper::localizedString(*controlledEntity, staticModel->modelNameString));
+		entityData.insert("vendor_name", hive::modelsLibrary::helper::localizedString(*controlledEntity, staticModel->vendorNameString));
+
+		entityData.insert("serial_number", dynamicModel->serialNumber.data());
+		entityData.insert("firmware_version", dynamicModel->firmwareVersion.data());
 	}
 }
 
@@ -163,7 +168,7 @@ QString EmvEntity::getLocale(int index1, int index2)
 
 QString EmvEntity::getLocale(QString locale, int index1, int index2)
 {
-	return entityConfigurations[getCurrentConfigurationIndex()].getLocaleText(language, index1, index2);
+	return entityConfigurations[getCurrentConfigurationIndex()].getLocaleText(locale, index1, index2);
 }
 
 int EmvEntity::getConfigurationCount()
@@ -231,6 +236,8 @@ void EmvEntity::changeLanguage(QString _lang)
 		language = _lang.toUpper();
 	else
 		qCritical() << "Wrong format for Locale Identifier";
+
+	xmlsetEntityMetaData();
 }
 
 //---------------------------------------------------------------------------------------------------------------------------------- Read XML

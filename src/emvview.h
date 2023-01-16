@@ -27,15 +27,19 @@ public:
 
 	void addJacksViews();
 	void setDebug(bool _isDebug);
+	QString languageIdentifier;
 	
 
 
 private slots:
 	void addMixer();
-	void resetView();
+	void setView();
 	void changeConfigurationClicked();
 	void openFile();
+	void changeLanguage();
 
 private:
 	bool isDebug;
+	QString fileLocation;
+	
 };

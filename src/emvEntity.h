@@ -40,6 +40,7 @@ public:
     QString getLocale(int index1, int index2);
     QString getLocale(QString locale, int index1, int index2);
 
+	QString language;
 
 	//Setters
 	void changeLanguage(QString _lang);
@@ -48,7 +49,6 @@ private:
 	la::avdecc::UniqueIdentifier controlledEntiyID;
 
 
-    QString language;
     QDomDocument document;
     QMap<QString, QString> entityData;
     QMap<int, EmvConfiguration> entityConfigurations;

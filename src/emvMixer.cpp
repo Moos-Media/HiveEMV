@@ -19,6 +19,8 @@ EmvMixer::EmvMixer(EmvEntity *entity, QString type, QWidget *parent)
 		addJacks("IN");
 	else if (type.toUpper() == "JACKSOUT")
 		addJacks("OUT");
+	else if (type.toUpper() == "CONFIGCONTROLS")
+		addConfigurationControls();
 	
 }
 
@@ -224,6 +226,7 @@ void EmvMixer::addChannels()
 void EmvMixer::addJacks(QString _dir) {	
 	for (int i = 0; i < myEntity->getCurrentConfiguration().getJackAmount(_dir.toUpper()); i++)
 	{
+		int newRow = 0;
 		int newColumn = mixerArea->columnCount();
 		EmvJack currentJack = myEntity->getCurrentConfiguration().getJack(_dir.toUpper(), i);
 
@@ -233,7 +236,8 @@ void EmvMixer::addJacks(QString _dir) {
 		jackHeader->setTextFormat(Qt::RichText);
 		jackHeader->setStyleSheet(headerStyle);
 		jackHeader->setAlignment(Qt::AlignHCenter);
-		mixerArea->addWidget(jackHeader, 0, newColumn, Qt::AlignTop);
+		mixerArea->addWidget(jackHeader, newRow, newColumn, Qt::AlignTop);
+		++newRow;
 
 		//----------------------------------------------------------------- Jack Image
 		QLabel* picture = new QLabel();
@@ -322,7 +326,8 @@ void EmvMixer::addJacks(QString _dir) {
 		//Add Image to Area
 		picture->setPixmap(myMap.scaledToWidth(50));
 		picture->setAlignment(Qt::AlignHCenter);
-		mixerArea->addWidget(picture, 1, newColumn, Qt::AlignTop);
+		mixerArea->addWidget(picture, newRow, newColumn, Qt::AlignTop);
+		++newRow;
 
 		//----------------------------------------------------------------- Jack Flags
 
@@ -343,7 +348,30 @@ void EmvMixer::addJacks(QString _dir) {
 
 		QLabel* jackFlags = new QLabel(flagtext);
 		jackFlags->setAlignment(Qt::AlignHCenter);
-		mixerArea->addWidget(jackFlags, 2, newColumn, Qt::AlignTop);
+		mixerArea->addWidget(jackFlags, newRow, newColumn, Qt::AlignTop);
+		++newRow;
+
+		//----------------------------------------------------------------- Port Controls
+
+		auto portList = myEntity->getCurrentConfiguration().getAudioUnit(0).getExternalPorts(_dir);
+
+		for (int j = 0; j < portList.size(); ++j)
+		{
+			auto currentPort = portList[j];
+
+			if (currentPort.jackIndex == i)
+			{
+				for (int z = 0; z < currentPort.controlsCount; ++z)
+				{
+					int indexx = currentPort.controls[z].descriptionIndex[0];
+					int indexy = currentPort.controls[z].descriptionIndex[1];
+					mixerArea->addWidget(new QLabel(myEntity->getLocale(indexx, indexy)), newRow, newColumn);
+					++newRow;
+					addControlsToPage(currentPort.controls[z].controlTypeIndex, newRow, newColumn);
+					++newRow;
+				}
+			}
+		}
 	}
 }
 
@@ -528,4 +556,124 @@ void EmvMixer::addMetaData() {
 
 	mixerArea->addWidget(currentConfigHeader, row, 0);
 	mixerArea->addWidget(currentConfig, row, 1);
+}
+
+void EmvMixer::addConfigurationControls() {
+
+	//Get Amount of Controls to display
+	EmvConfiguration current = myEntity->getCurrentConfiguration();
+	int amount = current.getControlsAmount();
+
+	for (int i = 0; i < amount; ++i)
+	{
+		int newColumn = mixerArea->columnCount();
+
+		int index1 = current.getControl(i).descriptionIndex[0];
+		int index2 = current.getControl(i).descriptionIndex[1];
+		QString labelText = myEntity->getLocale(index1, index2);
+
+		QLabel* descLabel = new QLabel(labelText);
+		descLabel->setStyleSheet(headerStyle);
+		mixerArea->addWidget(descLabel, 0, newColumn);
+
+		addControlsToPage(current.getControl(i).controlTypeIndex, 1, newColumn);
+	}
+}
+
+void EmvMixer::addControlsToPage(int index, int row, int column) {
+	QCheckBox *enable = new QCheckBox();
+	QPushButton* identify = new QPushButton("Identify");
+	QCheckBox *mute = new QCheckBox();
+	QCheckBox *invert = new QCheckBox();
+	QDial *gain = new QDial();
+	QDial *attenuate = new QDial();
+	QDial *delay = new QDial();
+	QDial *srcMode = new QDial();
+	QPushButton* snapshot = new QPushButton("Snapshot");
+	QPushButton* pwrFrequency = new QPushButton("Power Line Frequency");
+	QPushButton* pwrStatus = new QPushButton("Power Status");
+	QPushButton* fanStatus = new QPushButton("Fan Status");
+	QPushButton* temp = new QPushButton("Temperatures");
+	QPushButton* alt = new QPushButton("Altitude");
+	QPushButton* relHum = new QPushButton("Relative Humidity");
+	QPushButton* absHum = new QPushButton("Absolute Humidity");
+	QPushButton* orientation = new QPushButton("Orientation");
+	QPushButton* velocity = new QPushButton("Velocity");
+	QPushButton* acceleration = new QPushButton("Acceleration");
+	QPushButton* filter = new QPushButton("Filter Response");
+	QPushButton* pressure = new QPushButton("Barometric Pressure");
+	QPushButton* manURL = new QPushButton("Manufacturer URL");
+	QPushButton* entityURL = new QPushButton("Entity URL");
+	QPushButton* configURL = new QPushButton("Configuration URL");
+	QPushButton* genURL = new QPushButton("Generic URL");
+	QPushButton* fault = new QPushButton("Fault State");
+	QPushButton* targetEntity = new QPushButton("Target Entity");
+	QPushButton* targetObject = new QPushButton("Target Object");
+	QPushButton* latency = new QPushButton("Latency Compensation");
+	QDial *panDial = new QDial();
+	QCheckBox *phantomPower = new QCheckBox();
+
+	if (index == 0)
+		mixerArea->addWidget(enable, row, column);
+	else if(index == 1)
+		mixerArea->addWidget(identify, row, column);
+	else if(index == 2)
+		mixerArea->addWidget(mute, row, column);
+	else if(index == 3)
+		mixerArea->addWidget(invert, row, column);
+	else if(index == 4)
+		mixerArea->addWidget(gain, row, column);
+	else if(index == 5)
+		mixerArea->addWidget(attenuate, row, column);
+	else if(index == 6)
+		mixerArea->addWidget(delay, row, column);
+	else if(index == 7)
+		mixerArea->addWidget(srcMode, row, column);
+	else if(index == 8)
+		mixerArea->addWidget(snapshot, row, column);
+	else if(index == 9)
+		mixerArea->addWidget(pwrFrequency, row, column);
+	else if(index == 10)
+		mixerArea->addWidget(pwrStatus, row, column);
+	else if(index == 11)
+		mixerArea->addWidget(fanStatus, row, column);
+	else if(index == 12)
+		mixerArea->addWidget(temp, row, column);
+	else if(index == 13)
+		mixerArea->addWidget(alt, row, column);
+	else if(index == 14)
+		mixerArea->addWidget(absHum, row, column);
+	else if(index == 15)
+		mixerArea->addWidget(relHum, row, column);
+	else if(index == 16)
+		mixerArea->addWidget(orientation, row, column);
+	else if(index == 17)
+		mixerArea->addWidget(velocity, row, column);
+	else if(index == 18)
+		mixerArea->addWidget(acceleration, row, column);
+	else if(index == 19)
+		mixerArea->addWidget(filter, row, column);
+	else if(index == 20)
+		mixerArea->addWidget(pressure, row, column);
+	else if(index == 21)
+		mixerArea->addWidget(manURL, row, column);
+	else if(index == 22)
+		mixerArea->addWidget(entityURL, row, column);
+	else if(index == 23)
+		mixerArea->addWidget(configURL, row, column);
+	else if(index == 24)
+		mixerArea->addWidget(genURL, row, column);
+	else if(index == 25)
+		mixerArea->addWidget(fault, row, column);
+	else if(index == 26)
+		mixerArea->addWidget(targetEntity, row, column);
+	else if(index == 27)
+		mixerArea->addWidget(targetObject, row, column);
+	else if(index == 28)//---------------------------------------------
+		mixerArea->addWidget(panDial, row, column);
+	else if(index == 30)
+		mixerArea->addWidget(phantomPower, row, column);
+	else
+		mixerArea->addWidget(new QLabel("Control not found"), row, column);
+
 }

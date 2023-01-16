@@ -50,4 +50,6 @@ private:
 
 	void addJacks(QString _dir);
 	void addMetaData();
+	void addConfigurationControls();
+	void addControlsToPage(int index, int row, int column);
 };

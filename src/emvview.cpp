@@ -11,16 +11,19 @@ EmvView::EmvView(QWidget * parent)
 	: QWidget(parent)
 {
 	isDebug = true;
+	languageIdentifier = "EN";
 	setupUi(this);
 
 	if (isDebug)
 	{
-		openFilePushButton->setEnabled(true);	
+		openFilePushButton->setEnabled(true);
+		languagePicker->setEnabled(true);
 	}
 
 	QObject::connect(openFilePushButton, SIGNAL(clicked()), this, SLOT(openFile()));
-	QObject::connect(configurationPicker, SIGNAL(currentIndexChanged(int)), this, SLOT(resetView(false)));
+	//QObject::connect(configurationPicker, SIGNAL(currentIndexChanged(int)), this, SLOT(setView()));
 	QObject::connect(configurationChangeButton, SIGNAL(clicked()), this, SLOT(changeConfigurationClicked()));
+	QObject::connect(languagePicker, SIGNAL(currentIndexChanged(int)), this, SLOT(changeLanguage()));
 	tabWidget->removeTab(0);
 	
 }
@@ -96,32 +99,16 @@ void EmvView::updateConfigurationPicker()
 	configurationPicker->addItem("Eins");
 	configurationPicker->addItem("Zwei");
 
-	resetView();
+	setView();
 }
 
-void EmvView::resetView()
+void EmvView::setView()
 {
 	int tabAmount = tabWidget->count();
 	for (int i = 0; i < tabAmount; i++)
 	{
 		tabWidget->removeTab(0);
-	}	
-}
-
-void EmvView::changeConfigurationClicked() {
-	//TODO:: Change Config
-
-	resetView();
-}
-
-void EmvView::openFile() {
-	QString fileName = QFileDialog::getOpenFileName(this, "Open Entity XML", "G://Meine Ablage/__Studium/9. Semester/Bachelorarbeit/Models");
-	//QString fileName = "G:/Meine Ablage/__Studium/9. Semester/Bachelorarbeit/Models/12mic.aemxml";
-
-	resetView();
-
-	// Get Entity
-	myEntity = EmvEntity(fileName, "DE");
+	}
 
 	//Change Label
 	QString labelText = "";
@@ -135,31 +122,66 @@ void EmvView::openFile() {
 		configurationPicker->addItem(myEntity.getConfigurationDescription(i));
 	}
 
-	
-
+	//Add Metadata Tab
 	EmvMixer* metaData = new EmvMixer(&myEntity, "METADATA", this);
 	tabWidget->addTab(metaData, "Entity Information");
 
-	addJacksViews();
+	//Add Config Controls Tab
+	EmvMixer* configControls = new EmvMixer(&myEntity, "CONFIGCONTROLS", this);
+	tabWidget->addTab(configControls, "Configuration Controls");
 
-	/*
-	for (int i = 0; i < 30; ++i)
-	{
-		int index1 = myEntity.getCurrentConfiguration().getAudioUnit(0).controls[i].descriptionIndex[0];
-		int index2 = myEntity.getCurrentConfiguration().getAudioUnit(0).controls[i].descriptionIndex[1];
-		qDebug() << myEntity.getLocale(index1, index2) << " control " << i;
-	}
-	qDebug() << myEntity.getCurrentConfiguration().getAudioUnit(0).controlsCount << "controls count";
-	*/
-	//qDebug() << myEntity.getConfiguration(0).getControl(0).values[0].type;
-	//qDebug() << myEntity.getConfiguration(myEntity.getCurrentConfiguration()).getControl(0).descriptionIndex[0;
+	//Add Jacks Tabs
+	addJacksViews();
+}
+
+void EmvView::changeConfigurationClicked() {
+	//TODO:: Change Config
+
+	setView();
+}
+
+void EmvView::openFile() {
+	fileLocation = QFileDialog::getOpenFileName(this, "Open Entity XML", "G://Meine Ablage/__Studium/9. Semester/Bachelorarbeit/Models");
+	//fileLocation = "G:/Meine Ablage/__Studium/9. Semester/Bachelorarbeit/Models/12mic.aemxml";
+
+	// Get Entity
+	myEntity = EmvEntity(fileLocation, languageIdentifier);
+
+	qDebug() << myEntity.getLocale(0, 2);
+	setView();
 }
 
 void EmvView::addMixer() {}
+
+void EmvView::changeLanguage() {
+	//Get current Index of selected Language
+	int langIndex = languagePicker->currentIndex();
+
+	if (langIndex == 0)
+		languageIdentifier = "EN";
+	else if (langIndex == 1)
+		languageIdentifier = "DE";
+	else if (langIndex == 2)
+		languageIdentifier = "FR";
+	else
+		languageIdentifier = "EN";
+
+	
+	myEntity.changeLanguage(languageIdentifier);
+	qDebug() << languageIdentifier << "Lang identifier";
+
+	if (fileLocation != "")
+		setView();
+	qDebug() << myEntity.language << "Lang im Entity";
+}
 
 void EmvView::setDebug(bool _isDebug) {
 	isDebug = _isDebug;
 
 	if (!isDebug)
+	{
 		openFilePushButton->setEnabled(false);
+		languagePicker->setEnabled(false);
+	}
+		
 }

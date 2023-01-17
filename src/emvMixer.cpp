@@ -637,7 +637,12 @@ void EmvMixer::addControlsToPage(int index, int row, int column) {
 	QPushButton* targetObject = new QPushButton("Target Object");
 	QPushButton* latency = new QPushButton("Latency Compensation");
 	QDial *panDial = new QDial();
+	panDial->setMaximum(100);
+	panDial->setValue(50);
+	QObject::connect(panDial, SIGNAL(valueChanged(int)), this, SLOT(test()));
 	QCheckBox *phantomPower = new QCheckBox();
+
+	qDebug() << index << "Controls index"; 
 
 	if (index == 0)
 		mixerArea->addWidget(enable, row, column);
@@ -695,11 +700,18 @@ void EmvMixer::addControlsToPage(int index, int row, int column) {
 		mixerArea->addWidget(targetEntity, row, column);
 	else if(index == 27)
 		mixerArea->addWidget(targetObject, row, column);
-	else if(index == 28)//---------------------------------------------
+	else if (index == 28)
+		mixerArea->addWidget(latency, row, column);
+	else if(index == 30)//---------------------------------------------
 		mixerArea->addWidget(panDial, row, column);
-	else if(index == 30)
+	else if(index == 31)
 		mixerArea->addWidget(phantomPower, row, column);
 	else
 		mixerArea->addWidget(new QLabel("Control not found"), row, column);
+
+}
+
+void EmvMixer::test() {
+	qDebug() << qobject_cast<QDial*>(sender())->value();
 
 }

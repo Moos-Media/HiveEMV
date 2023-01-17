@@ -141,8 +141,8 @@ void EmvView::changeConfigurationClicked() {
 }
 
 void EmvView::openFile() {
-	fileLocation = QFileDialog::getOpenFileName(this, "Open Entity XML", "G://Meine Ablage/__Studium/9. Semester/Bachelorarbeit/Models");
-	//fileLocation = "G:/Meine Ablage/__Studium/9. Semester/Bachelorarbeit/Models/12mic.aemxml";
+	//fileLocation = QFileDialog::getOpenFileName(this, "Open Entity XML", "G://Meine Ablage/__Studium/9. Semester/Bachelorarbeit/Models");
+	fileLocation = "G:/Meine Ablage/__Studium/9. Semester/Bachelorarbeit/Models/12mic.aemxml";
 
 	// Get Entity
 	myEntity = EmvEntity(fileLocation, languageIdentifier);

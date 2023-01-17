@@ -29,6 +29,7 @@ private slots:
 	void updatePanReset();
 	void updateLevelsSlider();
 	void updateLevelsMute();
+	void test();
 
 private:
 	//Gain
@@ -54,4 +55,5 @@ private:
 	void addControlsToPage(int index, int row, int column);
 	QMap<int, QMap<int, EmvControl*>> controlPointers;
 	QMap<int, EmvControl*> controlPointersTemp;
+
 };

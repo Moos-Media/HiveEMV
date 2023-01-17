@@ -56,6 +56,8 @@ EmvEntity::EmvEntity(la::avdecc::UniqueIdentifier _entityID)
 
 		entityData.insert("serial_number", dynamicModel->serialNumber.data());
 		entityData.insert("firmware_version", dynamicModel->firmwareVersion.data());
+
+		
 	}
 }
 

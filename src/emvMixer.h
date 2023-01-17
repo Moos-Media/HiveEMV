@@ -52,4 +52,6 @@ private:
 	void addMetaData();
 	void addConfigurationControls();
 	void addControlsToPage(int index, int row, int column);
+	QMap<int, QMap<int, EmvControl*>> controlPointers;
+	QMap<int, EmvControl*> controlPointersTemp;
 };

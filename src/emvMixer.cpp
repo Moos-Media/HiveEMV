@@ -362,6 +362,7 @@ void EmvMixer::addJacks(QString _dir) {
 			mixerArea->addWidget(new QLabel(myEntity->getLocale(indexx, indexy)), newRow, newColumn);
 			++newRow;
 			addControlsToPage(currentControl.controlTypeIndex, newRow, newColumn);
+			controlPointersTemp.insert(newRow, &currentControl);
 			++newRow;
 		}
 
@@ -382,10 +383,15 @@ void EmvMixer::addJacks(QString _dir) {
 					mixerArea->addWidget(new QLabel(myEntity->getLocale(indexx, indexy)), newRow, newColumn);
 					++newRow;
 					addControlsToPage(currentPort.controls[z].controlTypeIndex, newRow, newColumn);
+					controlPointersTemp.insert(newRow, &currentPort.controls[z]);
 					++newRow;
 				}
 			}
 		}
+
+		//Insert Channel controls to entiry Map
+		controlPointers.insert(i, controlPointersTemp);
+		controlPointersTemp.clear();
 	}
 }
 
@@ -591,7 +597,13 @@ void EmvMixer::addConfigurationControls() {
 		mixerArea->addWidget(descLabel, 0, newColumn);
 
 		addControlsToPage(current.getControl(i).controlTypeIndex, 1, newColumn);
+		controlPointersTemp.insert(1, &current.getControl(i));
+
+		//Insert Channel controls to entiry Map
+		controlPointers.insert(i, controlPointersTemp);
+		controlPointersTemp.clear();
 	}
+	
 }
 
 void EmvMixer::addControlsToPage(int index, int row, int column) {

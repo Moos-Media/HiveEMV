@@ -1,5 +1,5 @@
 /*
-* Copyright (C) 2017-2022, Emilien Vallot, Christophe Calmejane and other contributors
+* Copyright (C) 2017-2023, Emilien Vallot, Christophe Calmejane and other contributors
 
 * This file is part of Hive.
 
@@ -127,6 +127,7 @@ DiscoveredEntitiesView::DiscoveredEntitiesView(QWidget* parent)
 				auto const& entity = controlledEntity->getEntity();
 				auto const entityModelID = entity.getEntityModelID();
 				auto const isAemSupported = entity.getEntityCapabilities().test(la::avdecc::entity::EntityCapability::AemSupported);
+				auto const hasAnyConfiguration = controlledEntity->hasAnyConfiguration();
 				auto const isIdentifyControlValid = !!controlledEntity->getIdentifyControlIndex();
 
 				auto* acquireAction{ static_cast<QAction*>(nullptr) };
@@ -142,7 +143,7 @@ DiscoveredEntitiesView::DiscoveredEntitiesView(QWidget* parent)
 				auto* dumpEntityModel{ static_cast<QAction*>(nullptr) };
 				auto* emv{ static_cast<QAction*>(nullptr) };
 
-				if (isAemSupported)
+				if (isAemSupported && hasAnyConfiguration)
 				{
 					// Do not propose Acquire if the device is Milan (not supported)
 					if (!controlledEntity->getCompatibilityFlags().test(la::avdecc::controller::ControlledEntity::CompatibilityFlag::Milan))
@@ -223,7 +224,7 @@ DiscoveredEntitiesView::DiscoveredEntitiesView(QWidget* parent)
 				{
 					dumpFullEntity = menu.addAction("Export Full Entity...");
 					dumpEntityModel = menu.addAction("Export Entity Model...");
-					dumpEntityModel->setEnabled(isAemSupported && entityModelID);
+					dumpEntityModel->setEnabled(isAemSupported && entityModelID && hasAnyConfiguration);
 				}
 
 				menu.addSeparator();

@@ -5,6 +5,7 @@ EmvConfiguration::EmvConfiguration(QDomNode _parent)
 {
     parent = _parent;
 	controlsAmount = 0;
+	isDebug = true;
 	xmlsetControls();
 	xmlsetJacks();
 	xmlsetAudioUnits();
@@ -13,6 +14,24 @@ EmvConfiguration::EmvConfiguration(QDomNode _parent)
 }
 
 EmvConfiguration::EmvConfiguration(){}
+
+EmvConfiguration::EmvConfiguration(la::avdecc::UniqueIdentifier _entityID, la::avdecc::controller::model::ConfigurationNode _node)
+{
+	isDebug = false;
+	controlsAmount = 0;
+	auto& manager = hive::modelsLibrary::ControllerManager::getInstance();
+	auto const& entity = *manager.getControlledEntity(_entityID);
+
+	name = hive::modelsLibrary::helper::configurationName(&entity, _node);
+
+	auto controlsMap = _node.controls;
+
+	for (unsigned int i = 0; i < controlsMap.size(); ++i)
+	{
+		controls.insert(i, EmvControl(_entityID, controlsMap[i]));
+		++controlsAmount;
+	}
+}
 
 
 //--------------------------------------------------------------------------------- Public Getters
@@ -54,6 +73,11 @@ QString EmvConfiguration::getConfigurationDescription(QString langiden) {
 	}
 
 	return value;
+}
+
+QString EmvConfiguration::getConfigName()
+{
+	return name;
 }
 
 EmvControl EmvConfiguration::getControl(int index) {

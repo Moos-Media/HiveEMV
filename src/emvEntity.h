@@ -15,6 +15,7 @@ public:
 
     //Entity MetaData Getters
     QString getEntityID();
+	la::avdecc::UniqueIdentifier getLaEntityID();
     QString getEntityModelID();
     QString getEntityCapabilities();
     int getMaxStreamSources();
@@ -46,7 +47,7 @@ public:
 	void changeLanguage(QString _lang);
 
 private:
-	la::avdecc::UniqueIdentifier controlledEntiyID;
+	la::avdecc::UniqueIdentifier controlledEntityID;
 
 
     QDomDocument document;

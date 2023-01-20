@@ -18,7 +18,7 @@ public:
 	int channelAmount;
 	la::avdecc::UniqueIdentifier controlledEntityID;
 
-	
+	bool isBlinking;
 
 	void addChannels();
 
@@ -29,7 +29,10 @@ private slots:
 	void updatePanReset();
 	void updateLevelsSlider();
 	void updateLevelsMute();
-	void test();
+
+	void controlCheckBoxChanged();
+	void controlPushButtonChanged();
+	void controlDialChanged();
 
 private:
 	//Gain
@@ -53,7 +56,6 @@ private:
 	void addMetaData();
 	void addConfigurationControls();
 	void addControlsToPage(int index, int row, int column);
-	QMap<int, QMap<int, EmvControl*>> controlPointers;
-	QMap<int, EmvControl*> controlPointersTemp;
+	QMap<int, EmvControl> controls;
 
 };

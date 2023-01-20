@@ -23,6 +23,7 @@ EmvEntity::EmvEntity(la::avdecc::UniqueIdentifier _entityID)
 {
 	auto& manager = hive::modelsLibrary::ControllerManager::getInstance();
 	auto controlledEntity = manager.getControlledEntity(_entityID);
+	controlledEntityID = _entityID;
 
 	if (controlledEntity)
 	{
@@ -45,10 +46,10 @@ EmvEntity::EmvEntity(la::avdecc::UniqueIdentifier _entityID)
 		entityData.insert("entity_model_id", hive::modelsLibrary::helper::uniqueIdentifierToString(actEntity.getEntityModelID()));
 		entityData.insert("talker_stream_sources", QString::number(actEntity.getTalkerStreamSources()));
 		entityData.insert("listener_stream_sinks", QString::number(actEntity.getListenerStreamSinks()));
-		entityData.insert("talker_capabilities", convertCapabilitiesDecToHexString(actEntity.getTalkerCapabilities().value()));
-		entityData.insert("listener_capabilities", convertCapabilitiesDecToHexString(actEntity.getListenerCapabilities().value()));
-		entityData.insert("controller_capabilities", convertCapabilitiesDecToHexString(actEntity.getControllerCapabilities().value()));
-		entityData.insert("entity_capabilities", convertCapabilitiesDecToHexString(actEntity.getEntityCapabilities().value()));
+		entityData.insert("talker_capabilities", convertDecToHexString(actEntity.getTalkerCapabilities().value(), 4));
+		entityData.insert("listener_capabilities", convertDecToHexString(actEntity.getListenerCapabilities().value(), 4));
+		entityData.insert("controller_capabilities", convertDecToHexString(actEntity.getControllerCapabilities().value(), 4));
+		entityData.insert("entity_capabilities", convertDecToHexString(actEntity.getEntityCapabilities().value(), 4));
 		if (actEntity.getAssociationID().has_value())
 			entityData.insert("association_id", QString::number(actEntity.getAssociationID().value(), 16));
 		entityData.insert("model_name", hive::modelsLibrary::helper::localizedString(*controlledEntity, staticModel->modelNameString));
@@ -56,8 +57,19 @@ EmvEntity::EmvEntity(la::avdecc::UniqueIdentifier _entityID)
 
 		entityData.insert("serial_number", dynamicModel->serialNumber.data());
 		entityData.insert("firmware_version", dynamicModel->firmwareVersion.data());
+		entityData.insert("current_configuration", QString::number(dynamicModel->currentConfiguration, 16));
 
-		
+
+		//Set up Configurations
+
+		auto configMap = controlledEntity->getEntityNode().configurations;
+
+		auto const& entity = *controlledEntity;
+
+		for (unsigned int i = 0; i < configMap.size(); i++)
+		{
+			entityConfigurations.insert(i, EmvConfiguration(_entityID, configMap[i]));
+		}
 	}
 }
 
@@ -66,6 +78,11 @@ EmvEntity::EmvEntity(la::avdecc::UniqueIdentifier _entityID)
 QString EmvEntity::getEntityID()
 {
 	return getEntityDataString("entity_id");
+}
+
+la::avdecc::UniqueIdentifier EmvEntity::getLaEntityID()
+{
+	return controlledEntityID;
 }
 
 QString EmvEntity::getEntityModelID()
@@ -134,7 +151,8 @@ QString EmvEntity::getSerialNumber()
 
 int EmvEntity::getCurrentConfigurationIndex()
 {
-	return getEntityDataInt("current_configuration");
+	bool temp;
+	return getEntityDataString("current_configuration").toInt(&temp, 16);
 }
 
 QString EmvEntity::getVendorName()

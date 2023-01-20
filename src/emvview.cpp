@@ -58,18 +58,17 @@ void EmvView::setControlledEntityID(la::avdecc::UniqueIdentifier const entityID)
 	//Save Entity ID
 	controlledEntityID = entityID;
 
-	
+	myEntity = EmvEntity(controlledEntityID);
+	EmvMixer* metaData = new EmvMixer(&myEntity, "METADATA", this);
+	tabWidget->addTab(metaData, "Entity Information");
 
 	//Update Titles
 	setWindowTitle(getEntityName());
 	entityLabel->setText(getEntityName());
 
 	//Update Window
-	updateConfigurationPicker();
-
-	myEntity = EmvEntity(controlledEntityID);
-	EmvMixer* metaData = new EmvMixer(&myEntity, "METADATA", this);
-	tabWidget->addTab(metaData, "Entity Information");
+	setView();
+	
 }
 
 QString EmvView::getEntityName()
@@ -90,37 +89,36 @@ QString EmvView::getEntityName()
 
 void EmvView::updateConfigurationPicker()
 {
-	// Removing Items from Selection
-	configurationPicker->removeItem(0);
-	configurationPicker->removeItem(0);
-
-	//Adding test configs
-	configurationPicker->addItem("Null");
-	configurationPicker->addItem("Eins");
-	configurationPicker->addItem("Zwei");
-
-	setView();
+	//Add Configs to Picker
+	configurationPicker->clear();
+	for (int i = 0; i < myEntity.getConfigurationCount(); ++i)
+	{
+		if (isDebug)
+			configurationPicker->addItem(myEntity.getConfigurationDescription(i));
+		else
+			configurationPicker->addItem(myEntity.getConfiguration(i).getConfigName());
+	}
+	configurationPicker->setCurrentIndex(myEntity.getCurrentConfigurationIndex());
 }
 
 void EmvView::setView()
 {
-	int tabAmount = tabWidget->count();
-	for (int i = 0; i < tabAmount; i++)
-	{
-		tabWidget->removeTab(0);
-	}
+	//Save current State of Tab Widget
+	int oldIndex = tabWidget->currentIndex();
+
+	//Block Config Change button
+	if (myEntity.getConfigurationCount() > 1)
+		configurationChangeButton->setEnabled(true);
+
+	//Clear old Tabs
+	tabWidget->clear();	
 
 	//Change Label
 	QString labelText = "";
 	labelText = labelText.append(myEntity.getVendorName()).append(" ").append(myEntity.getEntityName());
 	entityLabel->setText(labelText);
 
-	//Add Configs to Picker
-	configurationPicker->clear();
-	for (int i = 0; i < myEntity.getConfigurationCount(); ++i)
-	{
-		configurationPicker->addItem(myEntity.getConfigurationDescription(i));
-	}
+	updateConfigurationPicker();
 
 	//Add Metadata Tab
 	EmvMixer* metaData = new EmvMixer(&myEntity, "METADATA", this);
@@ -132,17 +130,26 @@ void EmvView::setView()
 
 	//Add Jacks Tabs
 	addJacksViews();
+
+	//Add Channels Tab
+	EmvMixer* mixerControls = new EmvMixer(&myEntity, "MIXER", this);
+	tabWidget->addTab(mixerControls, "Channels view");
+
+	//Get back to old Tab
+	tabWidget->setCurrentIndex(oldIndex);
 }
 
 void EmvView::changeConfigurationClicked() {
-	//TODO:: Change Config
 
-	setView();
+	int target = configurationPicker->currentIndex();
+	hive::modelsLibrary::ControllerManager::getInstance().setConfiguration(controlledEntityID, target);
+	QThread::sleep(2); // Temp fix
+	setControlledEntityID(controlledEntityID);
 }
 
 void EmvView::openFile() {
-	//fileLocation = QFileDialog::getOpenFileName(this, "Open Entity XML", "G://Meine Ablage/__Studium/9. Semester/Bachelorarbeit/Models");
-	fileLocation = "G:/Meine Ablage/__Studium/9. Semester/Bachelorarbeit/Models/12mic.aemxml";
+	fileLocation = QFileDialog::getOpenFileName(this, "Open Entity XML", "G://Meine Ablage/__Studium/9. Semester/Bachelorarbeit/Models");
+	//fileLocation = "G:/Meine Ablage/__Studium/9. Semester/Bachelorarbeit/Models/12mic.aemxml";
 
 	// Get Entity
 	myEntity = EmvEntity(fileLocation, languageIdentifier);

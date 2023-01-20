@@ -1,5 +1,7 @@
 #include "emvMixer.h"
 #include "emvUtils.h"
+#include <nodeTreeDynamicWidgets/controlValuesDynamicTreeWidgetItem.hpp>
+#include "C:\Users\lukas\source\repos\Hive\3rdparty\avdecc\include\la\avdecc\internals\entityModelControlValues.hpp"
 
 
 
@@ -12,6 +14,7 @@ EmvMixer::EmvMixer(EmvEntity *entity, QString type, QWidget *parent)
 	headerStyle = "font-weight: bold; font-size: 8pt; text-align: center;";
 
 	myEntity = entity;
+	channelAmount = 0;
 
 	if (type.toUpper() == "METADATA")
 		addMetaData();
@@ -21,7 +24,13 @@ EmvMixer::EmvMixer(EmvEntity *entity, QString type, QWidget *parent)
 		addJacks("OUT");
 	else if (type.toUpper() == "CONFIGCONTROLS")
 		addConfigurationControls();
-	
+	else
+	{
+		channelAmount = 10;
+		addChannels();
+	}
+
+	isBlinking = false;
 }
 
 EmvMixer::~EmvMixer()
@@ -125,6 +134,79 @@ void EmvMixer::updateLevelsMute()
 	}
 }
 
+void EmvMixer::controlCheckBoxChanged() {
+	QCheckBox *caller = qobject_cast<QCheckBox*>(sender());
+
+	int index = mixerArea->indexOf(caller);
+
+	EmvControl activatedControl = controls[index];
+}
+void EmvMixer::controlPushButtonChanged() {
+	QPushButton* caller = qobject_cast<QPushButton*>(sender());
+
+	int index = mixerArea->indexOf(caller);
+
+	EmvControl activatedControl = controls[index];
+
+	auto& manager = hive::modelsLibrary::ControllerManager::getInstance();
+	auto controlledEntity = manager.getControlledEntity(myEntity->getLaEntityID());
+
+
+	auto values = la::avdecc::entity::model::LinearValues<la::avdecc::entity::model::LinearValueDynamic<std::uint8_t>>();
+	auto value = la::avdecc::entity::model::LinearValueDynamic<std::uint8_t>();
+	if (isBlinking)
+		value.currentValue = 0;
+	else
+		value.currentValue = 255;
+
+	isBlinking = !isBlinking;
+
+	values.addValue(std::move(value));
+
+	manager.setControlValues(myEntity->getLaEntityID(), 0, la::avdecc::entity::model::ControlValues{ std::move(values) });
+		/*
+	auto desc = node.staticModel->localizedDescription;
+	auto stringtest = controlledEntity.get()->getLocalizedString(desc);
+
+	qDebug() << "Node: " << QString::fromStdString(stringtest.str());*/
+
+}
+void EmvMixer::controlDialChanged() {
+	QDial* caller = qobject_cast<QDial*>(sender());
+
+	int index = mixerArea->indexOf(caller);
+
+	EmvControl activatedControl = controls[index];
+
+	int dialValue = caller->value();
+	int testValue = ownMap(dialValue, 0, 100, -1270, 0);
+	int temp = testValue % 5;
+	testValue = testValue - temp;
+	
+	auto values = la::avdecc::entity::model::LinearValues<la::avdecc::entity::model::LinearValueDynamic<std::int16_t>>();
+
+	
+	auto valueLeft = la::avdecc::entity::model::LinearValueDynamic<std::int16_t>();
+	auto valueRight = la::avdecc::entity::model::LinearValueDynamic<std::int16_t>();
+
+	valueLeft.currentValue = testValue;
+	valueLeft.currentValue = testValue;
+
+	values.addValue(std::move(valueLeft));
+	values.addValue(std::move(valueRight));
+
+	auto& manager = hive::modelsLibrary::ControllerManager::getInstance();
+
+	std::uint64_t id = 5191439808036110618;
+	auto controlledEntity = manager.getControlledEntity(la::avdecc::UniqueIdentifier(id));
+
+
+	manager.setControlValues(la::avdecc::UniqueIdentifier(id), 32, la::avdecc::entity::model::ControlValues{ std::move(values) });
+	
+	
+	qDebug() << "Value mapped: " << testValue;
+}
+
 //HELPERS--------------------------------------------------------------------------------------------------------
 
 void EmvMixer::addChannels()
@@ -223,7 +305,8 @@ void EmvMixer::addChannels()
 	}
 }
 
-void EmvMixer::addJacks(QString _dir) {	
+void EmvMixer::addJacks(QString _dir) {
+	int controlIndexCounter = 0;
 	for (int i = 0; i < myEntity->getCurrentConfiguration().getJackAmount(_dir.toUpper()); i++)
 	{
 		int newRow = 0;
@@ -238,6 +321,7 @@ void EmvMixer::addJacks(QString _dir) {
 		jackHeader->setAlignment(Qt::AlignHCenter);
 		mixerArea->addWidget(jackHeader, newRow, newColumn, Qt::AlignTop);
 		++newRow;
+		++controlIndexCounter;
 
 		//----------------------------------------------------------------- Jack Image
 		QLabel* picture = new QLabel();
@@ -328,6 +412,7 @@ void EmvMixer::addJacks(QString _dir) {
 		picture->setAlignment(Qt::AlignHCenter);
 		mixerArea->addWidget(picture, newRow, newColumn, Qt::AlignTop);
 		++newRow;
+		++controlIndexCounter;
 
 		//----------------------------------------------------------------- Jack Flags
 
@@ -350,6 +435,7 @@ void EmvMixer::addJacks(QString _dir) {
 		jackFlags->setAlignment(Qt::AlignHCenter);
 		mixerArea->addWidget(jackFlags, newRow, newColumn, Qt::AlignTop);
 		++newRow;
+		++controlIndexCounter;
 
 		//----------------------------------------------------------------- Jack Controls
 
@@ -361,9 +447,11 @@ void EmvMixer::addJacks(QString _dir) {
 			int indexy = currentControl.descriptionIndex[1];
 			mixerArea->addWidget(new QLabel(myEntity->getLocale(indexx, indexy)), newRow, newColumn);
 			++newRow;
+			++controlIndexCounter;
 			addControlsToPage(currentControl.controlTypeIndex, newRow, newColumn);
-			controlPointersTemp.insert(newRow, &currentControl);
+			controls.insert(controlIndexCounter, currentControl);
 			++newRow;
+			++controlIndexCounter;
 		}
 
 		//----------------------------------------------------------------- Port Controls
@@ -382,17 +470,16 @@ void EmvMixer::addJacks(QString _dir) {
 					int indexy = currentPort.controls[z].descriptionIndex[1];
 					mixerArea->addWidget(new QLabel(myEntity->getLocale(indexx, indexy)), newRow, newColumn);
 					++newRow;
+					++controlIndexCounter;
 					addControlsToPage(currentPort.controls[z].controlTypeIndex, newRow, newColumn);
-					controlPointersTemp.insert(newRow, &currentPort.controls[z]);
+					controls.insert(controlIndexCounter, currentPort.controls[z]);
 					++newRow;
+					++controlIndexCounter;
 				}
 			}
 		}
-
-		//Insert Channel controls to entiry Map
-		controlPointers.insert(i, controlPointersTemp);
-		controlPointersTemp.clear();
 	}
+
 }
 
 void EmvMixer::addMetaData() {
@@ -454,7 +541,7 @@ void EmvMixer::addMetaData() {
 
 	capabilites = myEntity->getListenerCapabilities();
 	outputText = "";
-	outputText.append("Can be sink of: ");
+	outputText.append("Can be Sink of: ");
 
 	for (int i = 0; i < capabilites.size(); ++i)
 	{
@@ -476,7 +563,13 @@ void EmvMixer::addMetaData() {
 	firmwareVersion->setText(myEntity->getFirmwareVersion());
 	groupName->setText(myEntity->getGroupName());
 	serialNumber->setText(myEntity->getSerialNumber());
-	currentConfig->setText(myEntity->getConfigurationDescription(myEntity->getCurrentConfigurationIndex()));
+	QString debugMode = myEntity->getConfigurationDescription(myEntity->getCurrentConfigurationIndex());
+	QString normaleMode = myEntity->getCurrentConfiguration().getConfigName();
+
+	if (debugMode.length() > normaleMode.length())
+		currentConfig->setText(debugMode);
+	else
+		currentConfig->setText(normaleMode);
 
 	//Set Header Labels
 	entityIDHeader->setText("Entity ID:");
@@ -579,70 +672,102 @@ void EmvMixer::addMetaData() {
 }
 
 void EmvMixer::addConfigurationControls() {
+	int controlIndexCounter = 0;
 
 	//Get Amount of Controls to display
 	EmvConfiguration current = myEntity->getCurrentConfiguration();
 	int amount = current.getControlsAmount();
-
+	QString labelText;
 	for (int i = 0; i < amount; ++i)
 	{
 		int newColumn = mixerArea->columnCount();
 
-		int index1 = current.getControl(i).descriptionIndex[0];
-		int index2 = current.getControl(i).descriptionIndex[1];
-		QString labelText = myEntity->getLocale(index1, index2);
+		if (current.getControl(i).isDebug)
+		{
+			int index1 = current.getControl(i).descriptionIndex[0];
+			int index2 = current.getControl(i).descriptionIndex[1];
+			labelText = myEntity->getLocale(index1, index2);
+		}
+		else
+			labelText = current.getControl(i).controlName;
 
 		QLabel* descLabel = new QLabel(labelText);
 		descLabel->setStyleSheet(headerStyle);
 		mixerArea->addWidget(descLabel, 0, newColumn);
+		++controlIndexCounter;
 
 		addControlsToPage(current.getControl(i).controlTypeIndex, 1, newColumn);
-		controlPointersTemp.insert(1, &current.getControl(i));
-
-		//Insert Channel controls to entiry Map
-		controlPointers.insert(i, controlPointersTemp);
-		controlPointersTemp.clear();
+		++controlIndexCounter;
+		controls.insert(controlIndexCounter, current.getControl(i));
 	}
-	
 }
 
 void EmvMixer::addControlsToPage(int index, int row, int column) {
-	QCheckBox *enable = new QCheckBox();
-	QPushButton* identify = new QPushButton("Identify");
-	QCheckBox *mute = new QCheckBox();
-	QCheckBox *invert = new QCheckBox();
-	QDial *gain = new QDial();
-	QDial *attenuate = new QDial();
-	QDial *delay = new QDial();
-	QDial *srcMode = new QDial();
-	QPushButton* snapshot = new QPushButton("Snapshot");
-	QPushButton* pwrFrequency = new QPushButton("Power Line Frequency");
-	QPushButton* pwrStatus = new QPushButton("Power Status");
-	QPushButton* fanStatus = new QPushButton("Fan Status");
-	QPushButton* temp = new QPushButton("Temperatures");
-	QPushButton* alt = new QPushButton("Altitude");
-	QPushButton* relHum = new QPushButton("Relative Humidity");
-	QPushButton* absHum = new QPushButton("Absolute Humidity");
-	QPushButton* orientation = new QPushButton("Orientation");
-	QPushButton* velocity = new QPushButton("Velocity");
-	QPushButton* acceleration = new QPushButton("Acceleration");
-	QPushButton* filter = new QPushButton("Filter Response");
-	QPushButton* pressure = new QPushButton("Barometric Pressure");
-	QPushButton* manURL = new QPushButton("Manufacturer URL");
-	QPushButton* entityURL = new QPushButton("Entity URL");
-	QPushButton* configURL = new QPushButton("Configuration URL");
-	QPushButton* genURL = new QPushButton("Generic URL");
-	QPushButton* fault = new QPushButton("Fault State");
-	QPushButton* targetEntity = new QPushButton("Target Entity");
-	QPushButton* targetObject = new QPushButton("Target Object");
-	QPushButton* latency = new QPushButton("Latency Compensation");
-	QDial *panDial = new QDial();
-	panDial->setMaximum(100);
-	panDial->setValue(50);
-	QObject::connect(panDial, SIGNAL(valueChanged(int)), this, SLOT(test()));
-	QCheckBox *phantomPower = new QCheckBox();
 
-	qDebug() << index << "Controls index"; 
+	QCheckBox *enable = new QCheckBox();
+	QObject::connect(enable, SIGNAL(stateChanged(int)), this, SLOT(controlCheckBoxChanged()));
+	QPushButton* identify = new QPushButton("Identify");
+	QObject::connect(identify, SIGNAL(clicked()), this, SLOT(controlPushButtonChanged()));
+	QCheckBox *mute = new QCheckBox();
+	QObject::connect(mute, SIGNAL(stateChanged(int)), this, SLOT(controlCheckBoxChanged()));
+	QCheckBox *invert = new QCheckBox();
+	QObject::connect(invert, SIGNAL(stateChanged(int)), this, SLOT(controlCheckBoxChanged()));
+	QDial *gain = new QDial();
+	gain->setMaximumWidth(75);
+	QObject::connect(gain, SIGNAL(sliderReleased()), this, SLOT(controlDialChanged()));
+	QDial* attenuate = new QDial();
+	QObject::connect(attenuate, SIGNAL(sliderReleased()), this, SLOT(controlDialChanged()));
+	QDial* delay = new QDial();
+	QObject::connect(delay, SIGNAL(sliderReleased()), this, SLOT(controlDialChanged()));
+	QDial* srcMode = new QDial();
+	QObject::connect(srcMode, SIGNAL(sliderReleased()), this, SLOT(controlDialChanged()));
+	QPushButton* snapshot = new QPushButton("Snapshot");
+	QObject::connect(snapshot, SIGNAL(clicked()), this, SLOT(controlPushButtonChanged()));
+	QPushButton* pwrFrequency = new QPushButton("Power Line Frequency");
+	QObject::connect(pwrFrequency, SIGNAL(clicked()), this, SLOT(controlPushButtonChanged()));
+	QPushButton* pwrStatus = new QPushButton("Power Status");
+	QObject::connect(pwrStatus, SIGNAL(clicked()), this, SLOT(controlPushButtonChanged()));
+	QPushButton* fanStatus = new QPushButton("Fan Status");
+	QObject::connect(fanStatus, SIGNAL(clicked()), this, SLOT(controlPushButtonChanged()));
+	QPushButton* temp = new QPushButton("Temperatures");
+	QObject::connect(temp, SIGNAL(clicked()), this, SLOT(controlPushButtonChanged()));
+	QPushButton* alt = new QPushButton("Altitude");
+	QObject::connect(alt, SIGNAL(clicked()), this, SLOT(controlPushButtonChanged()));
+	QPushButton* relHum = new QPushButton("Relative Humidity");
+	QObject::connect(relHum, SIGNAL(clicked()), this, SLOT(controlPushButtonChanged()));
+	QPushButton* absHum = new QPushButton("Absolute Humidity");
+	QObject::connect(absHum, SIGNAL(clicked()), this, SLOT(controlPushButtonChanged()));
+	QPushButton* orientation = new QPushButton("Orientation");
+	QObject::connect(orientation, SIGNAL(clicked()), this, SLOT(controlPushButtonChanged()));
+	QPushButton* velocity = new QPushButton("Velocity");
+	QObject::connect(velocity, SIGNAL(clicked()), this, SLOT(controlPushButtonChanged()));
+	QPushButton* acceleration = new QPushButton("Acceleration");
+	QObject::connect(acceleration, SIGNAL(clicked()), this, SLOT(controlPushButtonChanged()));
+	QPushButton* filter = new QPushButton("Filter Response");
+	QObject::connect(filter, SIGNAL(clicked()), this, SLOT(controlPushButtonChanged()));
+	QPushButton* pressure = new QPushButton("Barometric Pressure");
+	QObject::connect(pressure, SIGNAL(clicked()), this, SLOT(controlPushButtonChanged()));
+	QPushButton* manURL = new QPushButton("Manufacturer URL");
+	QObject::connect(manURL, SIGNAL(clicked()), this, SLOT(controlPushButtonChanged()));
+	QPushButton* entityURL = new QPushButton("Entity URL");
+	QObject::connect(entityURL, SIGNAL(clicked()), this, SLOT(controlPushButtonChanged()));
+	QPushButton* configURL = new QPushButton("Configuration URL");
+	QObject::connect(configURL, SIGNAL(clicked()), this, SLOT(controlPushButtonChanged()));
+	QPushButton* genURL = new QPushButton("Generic URL");
+	QObject::connect(genURL, SIGNAL(clicked()), this, SLOT(controlPushButtonChanged()));
+	QPushButton* fault = new QPushButton("Fault State");
+	QObject::connect(fault, SIGNAL(clicked()), this, SLOT(controlPushButtonChanged()));
+	QPushButton* targetEntity = new QPushButton("Target Entity");
+	QObject::connect(targetEntity, SIGNAL(clicked()), this, SLOT(controlPushButtonChanged()));
+	QPushButton* targetObject = new QPushButton("Target Object");
+	QObject::connect(targetObject, SIGNAL(clicked()), this, SLOT(controlPushButtonChanged()));
+	QPushButton* latency = new QPushButton("Latency Compensation");
+	QObject::connect(latency, SIGNAL(clicked()), this, SLOT(controlPushButtonChanged()));
+	QDial *panDial = new QDial();
+	panDial->setValue(50);
+	QObject::connect(panDial, SIGNAL(sliderReleased()), this, SLOT(controlDialChanged()));
+	QCheckBox *phantomPower = new QCheckBox();
+	QObject::connect(phantomPower, SIGNAL(stateChanged(int)), this, SLOT(controlCheckBoxChanged()));
 
 	if (index == 0)
 		mixerArea->addWidget(enable, row, column);
@@ -708,10 +833,5 @@ void EmvMixer::addControlsToPage(int index, int row, int column) {
 		mixerArea->addWidget(phantomPower, row, column);
 	else
 		mixerArea->addWidget(new QLabel("Control not found"), row, column);
-
-}
-
-void EmvMixer::test() {
-	qDebug() << qobject_cast<QDial*>(sender())->value();
 
 }

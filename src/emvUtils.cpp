@@ -118,7 +118,7 @@ double getSamplingRateFromNode(QDomElement node) {
 	return base * multiplier;
 }
 
-QString convertCapabilitiesDecToHexString(int input) {
+QString convertDecToHexString(int input, int targetLength) {
 	// Basic structure found on:
 	// www.educative.io/answers/hot-to-convert-a-number-from-decimal-to-hexadecimal-in-cpp
 	int remainder, product = 1;
@@ -138,7 +138,7 @@ QString convertCapabilitiesDecToHexString(int input) {
 	}
 	std::reverse(hex_dec.begin(), hex_dec.end());
 	QString temp = QString::fromStdString(hex_dec);
-	int missing = 4 - temp.length();
+	int missing = targetLength - temp.length();
 	QString output = "";
 
 	//Make sure, output String is four characters long

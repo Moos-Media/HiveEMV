@@ -212,6 +212,7 @@ QString getVendorName(la::avdecc::UniqueIdentifier const entityID) noexcept
 		s_oui24ToName.emplace(std::make_pair(0x3CC0C6, "d&b audiotechnik GmbH"));
 		s_oui24ToName.emplace(std::make_pair(0x001CAB, "Meyer Sound Laboratories, Inc."));
 		s_oui24ToName.emplace(std::make_pair(0x0C4DE9, "Apple"));
+		s_oui24ToName.emplace(std::make_pair(0xB1BE83, "Apple"));
 		s_oui24ToName.emplace(std::make_pair(0x0090E5, "TEKNEMA, INC."));
 		s_oui24ToName.emplace(std::make_pair(0x0001F2, "Mark of the Unicorn, Inc."));
 		s_oui24ToName.emplace(std::make_pair(0xD0699E, "LUMINEX Lighting Control Equipment"));
@@ -240,6 +241,7 @@ QString getVendorName(la::avdecc::UniqueIdentifier const entityID) noexcept
 		s_oui24ToName.emplace(std::make_pair(0x000130, "Extreme Networks, Inc."));
 		s_oui24ToName.emplace(std::make_pair(0xF46E95, "Extreme Networks, Inc."));
 		s_oui24ToName.emplace(std::make_pair(0x784501, "Biamp Systems"));
+		s_oui24ToName.emplace(std::make_pair(0x480BB2, "RME Audio"));
 	}
 
 	// First search in OUI-24

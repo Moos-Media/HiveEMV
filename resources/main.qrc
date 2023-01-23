@@ -28,5 +28,31 @@
         <file>legal_notices.md</file>
         <file>L-Acoustics.png</file>
         <file>dbaudiotechnik.png</file>
+        <file alias="jack_adat">Jacks/adat.svg</file>
+        <file alias="jack_aesebu">Jacks/aesebu.svg</file>
+        <file alias="jack_antenna">Jacks/antenna.svg</file>
+        <file alias="jack_balanced">Jacks/balanced.svg</file>
+        <file alias="jack_component">Jacks/component.svg</file>
+        <file alias="jack_composite">Jacks/composite.svg</file>
+        <file alias="jack_default">Jacks/default.svg</file>
+        <file alias="jack_digital">Jacks/digital.svg</file>
+        <file alias="jack_displayport">Jacks/displayport.svg</file>
+        <file alias="jack_dvi">Jacks/dvi.svg</file>
+        <file alias="jack_ethernet">Jacks/ethernet.svg</file>
+        <file alias="jack_hdmi">Jacks/hdmi.svg</file>
+        <file alias="jack_headphone">Jacks/headphone.svg</file>
+        <file alias="jack_madi">Jacks/madi.svg</file>
+        <file alias="jack_microphone">Jacks/microphone.svg</file>
+        <file alias="jack_midi">Jacks/midi.svg</file>
+        <file alias="jack_spdif">Jacks/spdif.svg</file>
+        <file alias="jack_speaker">Jacks/speaker.svg</file>
+        <file alias="jack_svhs">Jacks/svhs.svg</file>
+        <file alias="jack_tdif">Jacks/tdif.svg</file>
+        <file alias="jack_tuner">Jacks/tuner.svg</file>
+        <file alias="jack_udi">Jacks/udi.svg</file>
+        <file alias="jack_unbalanced">Jacks/unbalanced.svg</file>
+        <file alias="jack_usb">Jacks/usb.svg</file>
+        <file alias="jack_wifi">Jacks/wifi.svg</file>
+        <file alias="jack_xlr">Jacks/xlr.svg</file>
     </qresource>
 </RCC>

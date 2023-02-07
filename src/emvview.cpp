@@ -5,6 +5,8 @@
 #include <QDebug>
 #include <QCoreApplication>
 #include "emvEntity.h"
+#include "emvFileHandler.h"
+#include "emvSettings.h"
 
 
 EmvView::EmvView(QWidget * parent)
@@ -21,7 +23,7 @@ EmvView::EmvView(QWidget * parent)
 	}
 
 	QObject::connect(openFilePushButton, SIGNAL(clicked()), this, SLOT(openFile()));
-	//QObject::connect(configurationPicker, SIGNAL(currentIndexChanged(int)), this, SLOT(setView()));
+	QObject::connect(openSettingsPushButton, SIGNAL(clicked()), this, SLOT(openSettings()));
 	QObject::connect(configurationChangeButton, SIGNAL(clicked()), this, SLOT(changeConfigurationClicked()));
 	QObject::connect(languagePicker, SIGNAL(currentIndexChanged(int)), this, SLOT(changeLanguage()));
 	tabWidget->removeTab(0);
@@ -148,14 +150,30 @@ void EmvView::changeConfigurationClicked() {
 }
 
 void EmvView::openFile() {
-	fileLocation = QFileDialog::getOpenFileName(this, "Open Entity XML", "G://Meine Ablage/__Studium/9. Semester/Bachelorarbeit/Models");
+	fileLocation = QFileDialog::getOpenFileName(this, "Open Entity XML", "G://Meine Ablage/__Studium/9. Semester/Bachelorarbeit");
 	//fileLocation = "G:/Meine Ablage/__Studium/9. Semester/Bachelorarbeit/Models/12mic.aemxml";
 
 	// Get Entity
 	myEntity = EmvEntity(fileLocation, languageIdentifier);
+	EmvFileHandler myHandler = EmvFileHandler(fileLocation, languageIdentifier);
 
-	qDebug() << myEntity.getLocale(0, 2);
 	setView();
+}
+
+void EmvView::openSettings() {
+	if (!settingsAreOpen)
+	{
+		emvSettings* emvSettingsWindow = new emvSettings();
+		emvSettingsWindow->setWindowTitle("Settings");
+		emvSettingsWindow->show();
+		settingsAreOpen = true;
+		QObject::connect(emvSettingsWindow, SIGNAL(finished(int)), this, SLOT(settingsFinished(int)));
+		QObject::connect(emvSettingsWindow, SIGNAL(settingsChanged()), this, SLOT(setView()));
+	}
+}
+
+void EmvView::settingsFinished(int resultCode) {
+	settingsAreOpen = false;
 }
 
 void EmvView::addMixer() {}

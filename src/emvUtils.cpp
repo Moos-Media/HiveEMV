@@ -8,6 +8,28 @@ int ownMap(double n, double start1, double stop1, double start2, double stop2)
     return (n - start1) / (stop1 - start1) * (stop2 - start2) + start2;
 }
 
+int clampValue(int value, int min, int max, int step)
+{
+	int output = 0;
+
+	//Clamp values up or down
+	if ((value % step) < (step / 2))
+		output = value - (value % step);
+	else
+		output = value + step - (value % step);
+
+	//Check if boundaries are unbroken
+	if (output < min)
+		output = min;
+
+	if (output > max)
+		output = max;
+
+	//Return final value
+	return output;
+
+}
+
 string panMapping(int input) {
     string output = "";
     int value = 2*(input - 50);

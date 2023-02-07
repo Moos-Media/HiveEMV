@@ -1,7 +1,9 @@
 #include "emvMixer.h"
 #include "emvUtils.h"
-#include <nodeTreeDynamicWidgets/controlValuesDynamicTreeWidgetItem.hpp>
-#include "C:\Users\lukas\source\repos\Hive\3rdparty\avdecc\include\la\avdecc\internals\entityModelControlValues.hpp"
+//#include <nodeTreeDynamicWidgets/controlValuesDynamicTreeWidgetItem.hpp>
+//#include "C:\Users\lukas\source\repos\Hive\3rdparty\avdecc\include\la\avdecc\internals\entityModelControlValues.hpp"
+#include <la/avdecc/internals/entityModelControlValues.hpp>
+#include <la/avdecc/internals/entityModelControlValuesTraits.hpp>
 
 
 
@@ -30,7 +32,8 @@ EmvMixer::EmvMixer(EmvEntity *entity, QString type, QWidget *parent)
 		addChannels();
 	}
 
-	isBlinking = false;
+	auto* const settings = qApp->property(settings::SettingsManager::PropertyName).value<settings::SettingsManager*>();
+	isBlinking = settings->getValue("emvMixer").toBool();
 }
 
 EmvMixer::~EmvMixer()
@@ -161,6 +164,9 @@ void EmvMixer::controlPushButtonChanged() {
 
 	isBlinking = !isBlinking;
 
+	auto* const settings = qApp->property(settings::SettingsManager::PropertyName).value<settings::SettingsManager*>();
+	settings->setValue("emvMixer", isBlinking);
+
 	values.addValue(std::move(value));
 
 	manager.setControlValues(myEntity->getLaEntityID(), 0, la::avdecc::entity::model::ControlValues{ std::move(values) });
@@ -200,11 +206,19 @@ void EmvMixer::controlDialChanged() {
 	std::uint64_t id = 5191439808036110618;
 	auto controlledEntity = manager.getControlledEntity(la::avdecc::UniqueIdentifier(id));
 
-
-	manager.setControlValues(la::avdecc::UniqueIdentifier(id), 32, la::avdecc::entity::model::ControlValues{ std::move(values) });
+	//Index should be 32 for Headphone Gain
+	//37 combo 65 müsste 
+	manager.setControlValues(la::avdecc::UniqueIdentifier(id), 65, la::avdecc::entity::model::ControlValues{ std::move(values) });
 	
 	
 	qDebug() << "Value mapped: " << testValue;
+}
+void EmvMixer::controlSliderChanged() {
+	QCheckBox* caller = qobject_cast<QCheckBox*>(sender());
+
+	int index = mixerArea->indexOf(caller);
+
+	EmvControl activatedControl = controls[index];
 }
 
 //HELPERS--------------------------------------------------------------------------------------------------------
@@ -703,18 +717,12 @@ void EmvMixer::addConfigurationControls() {
 }
 
 void EmvMixer::addControlsToPage(int index, int row, int column) {
+	auto* const settings = qApp->property(settings::SettingsManager::PropertyName).value<settings::SettingsManager*>();
 
-	QCheckBox *enable = new QCheckBox();
-	QObject::connect(enable, SIGNAL(stateChanged(int)), this, SLOT(controlCheckBoxChanged()));
 	QPushButton* identify = new QPushButton("Identify");
 	QObject::connect(identify, SIGNAL(clicked()), this, SLOT(controlPushButtonChanged()));
-	QCheckBox *mute = new QCheckBox();
+	QCheckBox* mute = new QCheckBox();
 	QObject::connect(mute, SIGNAL(stateChanged(int)), this, SLOT(controlCheckBoxChanged()));
-	QCheckBox *invert = new QCheckBox();
-	QObject::connect(invert, SIGNAL(stateChanged(int)), this, SLOT(controlCheckBoxChanged()));
-	QDial *gain = new QDial();
-	gain->setMaximumWidth(75);
-	QObject::connect(gain, SIGNAL(sliderReleased()), this, SLOT(controlDialChanged()));
 	QDial* attenuate = new QDial();
 	QObject::connect(attenuate, SIGNAL(sliderReleased()), this, SLOT(controlDialChanged()));
 	QDial* delay = new QDial();
@@ -763,22 +771,75 @@ void EmvMixer::addControlsToPage(int index, int row, int column) {
 	QObject::connect(targetObject, SIGNAL(clicked()), this, SLOT(controlPushButtonChanged()));
 	QPushButton* latency = new QPushButton("Latency Compensation");
 	QObject::connect(latency, SIGNAL(clicked()), this, SLOT(controlPushButtonChanged()));
-	QDial *panDial = new QDial();
+	QDial* panDial = new QDial();
 	panDial->setValue(50);
 	QObject::connect(panDial, SIGNAL(sliderReleased()), this, SLOT(controlDialChanged()));
-	QCheckBox *phantomPower = new QCheckBox();
-	QObject::connect(phantomPower, SIGNAL(stateChanged(int)), this, SLOT(controlCheckBoxChanged()));
 
 	if (index == 0)
-		mixerArea->addWidget(enable, row, column);
+	{
+		if (settings->getValue("emvSettingsEnable").toInt() == 0)
+		{
+			QCheckBox* enable = new QCheckBox();
+			QObject::connect(enable, SIGNAL(stateChanged(int)), this, SLOT(controlCheckBoxChanged()));
+			mixerArea->addWidget(enable, row, column);
+		}
+		else
+		{
+			QPushButton* enable = new QPushButton();
+			QObject::connect(enable, SIGNAL(clicked()), this, SLOT(controlPushButtonChanged()));
+			mixerArea->addWidget(enable, row, column);
+		}
+	}
+	else if (index == 4)
+	{
+		if (settings->getValue("emvSettingsGain").toInt() == 0)
+		{
+			QDial* gain = new QDial();
+			gain->setMaximumWidth(75);
+			QObject::connect(gain, SIGNAL(sliderReleased()), this, SLOT(controlDialChanged()));
+			mixerArea->addWidget(gain, row, column);
+		}
+		else
+		{
+			QSlider* gain = new QSlider();
+			QObject::connect(gain, SIGNAL(sliderReleased()), this, SLOT(controlSliderChanged()));
+			mixerArea->addWidget(gain, row, column);
+		}
+	}
+	else if (index == 3)
+	{
+		if (settings->getValue("emvSettingsInvert").toInt() == 0)
+		{
+			QCheckBox* invert = new QCheckBox();
+			QObject::connect(invert, SIGNAL(stateChanged(int)), this, SLOT(controlCheckBoxChanged()));
+			mixerArea->addWidget(invert, row, column);
+		}
+		else
+		{
+			QPushButton* invert = new QPushButton();
+			QObject::connect(invert, SIGNAL(clicked()), this, SLOT(controlPushButtonChanged()));
+			mixerArea->addWidget(invert, row, column);
+		}
+	}
+	else if (index == 31)
+	{
+		if (settings->getValue("emvSettingsPhantom").toInt() == 0)
+		{
+			QCheckBox* phantomPower = new QCheckBox();
+			QObject::connect(phantomPower, SIGNAL(stateChanged(int)), this, SLOT(controlCheckBoxChanged()));
+			mixerArea->addWidget(phantomPower, row, column);
+		}
+		else
+		{
+			QPushButton* phantomPower = new QPushButton();
+			QObject::connect(phantomPower, SIGNAL(clicked()), this, SLOT(controlPushButtonChanged()));
+			mixerArea->addWidget(phantomPower, row, column);
+		}
+	}
 	else if(index == 1)
 		mixerArea->addWidget(identify, row, column);
 	else if(index == 2)
-		mixerArea->addWidget(mute, row, column);
-	else if(index == 3)
-		mixerArea->addWidget(invert, row, column);
-	else if(index == 4)
-		mixerArea->addWidget(gain, row, column);
+		mixerArea->addWidget(mute, row, column);				
 	else if(index == 5)
 		mixerArea->addWidget(attenuate, row, column);
 	else if(index == 6)
@@ -828,10 +889,24 @@ void EmvMixer::addControlsToPage(int index, int row, int column) {
 	else if (index == 28)
 		mixerArea->addWidget(latency, row, column);
 	else if(index == 30)//---------------------------------------------
-		mixerArea->addWidget(panDial, row, column);
-	else if(index == 31)
-		mixerArea->addWidget(phantomPower, row, column);
+		mixerArea->addWidget(panDial, row, column);		
 	else
 		mixerArea->addWidget(new QLabel("Control not found"), row, column);
 
 }
+
+/* void EmvMixer::sendControlData(node, valuuToSend)
+{
+	/*
+	* get control index from node
+	* Get boundaries from node
+	* Get value types from node
+	*
+	* pack new value in boundaries
+	*
+	* pack in values[]
+	*
+	* send values out
+	
+}
+*/

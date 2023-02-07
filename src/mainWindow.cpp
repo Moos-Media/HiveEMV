@@ -338,10 +338,10 @@ void MainWindowImpl::createViewMenu()
 	// Main widgets visibility toggle
 	menuView->addAction(entitiesDockWidget->toggleViewAction());
 	menuView->addAction(entityInspectorDockWidget->toggleViewAction());
-
+	/*
 	//Entity Model Viewer visibility toggle
 	menuView->addAction(emvDockWidget->toggleViewAction());
-	menuView->addSeparator();
+	menuView->addSeparator();*/
 
 	// Logger visibility toggle
 	menuView->addAction(loggerDockWidget->toggleViewAction());

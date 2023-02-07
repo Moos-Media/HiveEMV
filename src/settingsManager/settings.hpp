@@ -62,6 +62,16 @@ static SettingsManager::SettingDefault Controller_DiscoveryDelay = { "avdecc/con
 static SettingsManager::SettingDefault Controller_AemCacheEnabled = { "avdecc/controller/enableAemCache", false };
 static SettingsManager::SettingDefault Controller_FullStaticModelEnabled = { "avdecc/controller/fullStaticModel", false };
 static SettingsManager::SettingDefault Controller_AdvertisingEnabled = { "avdecc/controller/enableAdvertising", true };
+static SettingsManager::SettingDefault LightIsBlinking = { "emvMixer", false };
+
+//Entity Model Viewer Settings
+static SettingsManager::SettingDefault Setting1 = { "emvSettingsEnable", 0 };
+static SettingsManager::SettingDefault Setting2 = { "emvSettingsGain", 0 };
+static SettingsManager::SettingDefault Setting3 = { "emvSettingsInvert", 0 };
+static SettingsManager::SettingDefault Setting4 = { "emvSettingsPhantom", 0 };
+static SettingsManager::SettingDefault Setting5 = { "emvSettingsBox1", 0 };
+static SettingsManager::SettingDefault Setting6 = { "emvSettingsBox2", 0 };
+
 #ifdef DEBUG
 static SettingsManager::SettingDefault Controller_ControllerSubID = { "avdecc/controller/controllerSubID_Debug", 4 + (hive::internals::marketingDigits > 2u ? 0x8000 : 0) };
 #else // !DEBUG

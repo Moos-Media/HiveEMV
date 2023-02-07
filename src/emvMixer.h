@@ -33,6 +33,7 @@ private slots:
 	void controlCheckBoxChanged();
 	void controlPushButtonChanged();
 	void controlDialChanged();
+	void controlSliderChanged();
 
 private:
 	//Gain

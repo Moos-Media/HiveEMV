@@ -36,10 +36,13 @@ private slots:
 	void setView();
 	void changeConfigurationClicked();
 	void openFile();
+	void openSettings();
 	void changeLanguage();
+	void settingsFinished(int resultCode);
 
 private:
 	bool isDebug;
+	bool settingsAreOpen = false;;
 	QString fileLocation;
 	
 };

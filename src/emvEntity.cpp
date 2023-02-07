@@ -39,9 +39,10 @@ EmvEntity::EmvEntity(la::avdecc::UniqueIdentifier _entityID)
 		auto actEntity = controlledEntity->getEntity();
 
 		auto const* const staticModel = controlledEntity->getEntityNode().staticModel;
-		auto const* const dynamicModel = controlledEntity->getEntityNode().dynamicModel;
+		auto const dynamicModel = controlledEntity->getEntityNode().dynamicModel;
 
-		entityData.insert("entity_name", hive::modelsLibrary::helper::entityName(*controlledEntity));		entityData.insert("group_name", hive::modelsLibrary::helper::groupName(*controlledEntity));
+		entityData.insert("entity_name", hive::modelsLibrary::helper::entityName(*controlledEntity));
+		entityData.insert("group_name", hive::modelsLibrary::helper::groupName(*controlledEntity));
 		entityData.insert("entity_id", hive::modelsLibrary::helper::uniqueIdentifierToString(_entityID));
 		entityData.insert("entity_model_id", hive::modelsLibrary::helper::uniqueIdentifierToString(actEntity.getEntityModelID()));
 		entityData.insert("talker_stream_sources", QString::number(actEntity.getTalkerStreamSources()));
@@ -56,6 +57,7 @@ EmvEntity::EmvEntity(la::avdecc::UniqueIdentifier _entityID)
 		entityData.insert("vendor_name", hive::modelsLibrary::helper::localizedString(*controlledEntity, staticModel->vendorNameString));
 
 		entityData.insert("serial_number", dynamicModel->serialNumber.data());
+		dynamicModel->firmwareVersion = std::string("test");
 		entityData.insert("firmware_version", dynamicModel->firmwareVersion.data());
 		entityData.insert("current_configuration", QString::number(dynamicModel->currentConfiguration, 16));
 
@@ -333,7 +335,7 @@ void EmvEntity::xmlReadStringFromNode(QDomElement node)
         index1 = node.firstChild().firstChild().toElement().text().toInt(&status, 16);
         index2 = node.firstChild().lastChild().toElement().text().toInt();
 
-        value =  getLocale(index1, index2);
+        value = getLocale(index1, index2);
     }
     else
     {

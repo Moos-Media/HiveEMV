@@ -133,6 +133,8 @@ set(HEADER_FILES_COMMON
 	emvConfiguration.h
 	emvEntity.h
 	emvClasses.h
+	emvFileHandler.h
+	emvSettings.h
 )
 
 set(SOURCE_FILES_COMMON
@@ -206,6 +208,8 @@ set(SOURCE_FILES_COMMON
 	emvConfiguration.cpp
 	emvEntity.cpp
 	emvClasses.cpp
+	emvFileHandler.cpp
+	emvSettings.cpp
 )
 
 set(UI_FILES_COMMON
@@ -221,6 +225,7 @@ set(UI_FILES_COMMON
 	mainWindow.ui
 	emvview.ui
 	emvMixer.ui
+	emvSettings.ui
 )
 
 set(SOURCE_FILES_APP

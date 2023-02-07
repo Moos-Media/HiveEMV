@@ -5,6 +5,8 @@ using namespace std;
 
 int ownMap(double, double, double, double, double);
 
+int clampValue(int, int, int, int);
+
 string panMapping(int);
 
 int panMapping(string);

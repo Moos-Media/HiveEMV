@@ -14,6 +14,7 @@ EmvView::EmvView(QWidget * parent)
 {
 	isDebug = true;
 	languageIdentifier = "EN";
+	entityPickerIndex = -1;
 	setupUi(this);
 
 	if (isDebug)
@@ -26,6 +27,7 @@ EmvView::EmvView(QWidget * parent)
 	QObject::connect(openSettingsPushButton, SIGNAL(clicked()), this, SLOT(openSettings()));
 	QObject::connect(configurationChangeButton, SIGNAL(clicked()), this, SLOT(changeConfigurationClicked()));
 	QObject::connect(languagePicker, SIGNAL(currentIndexChanged(int)), this, SLOT(changeLanguage()));
+	
 	tabWidget->removeTab(0);
 	
 }
@@ -105,6 +107,18 @@ void EmvView::updateConfigurationPicker()
 
 void EmvView::setView()
 {
+	//Update Entity Picker
+	QObject::disconnect(entityPicker, SIGNAL(currentIndexChanged(int)), this, SLOT(changeEntity()));
+	
+	entityPicker->clear();
+
+	for (int i = 0; i < entityList.size(); ++i)
+	{
+		entityPicker->addItem(entityList[i].getEntityName());
+	}
+	entityPicker->setCurrentIndex(entityPickerIndex);
+	QObject::connect(entityPicker, SIGNAL(currentIndexChanged(int)), this, SLOT(changeEntity()));
+
 	//Save current State of Tab Widget
 	int oldIndex = tabWidget->currentIndex();
 
@@ -153,9 +167,16 @@ void EmvView::openFile() {
 	fileLocation = QFileDialog::getOpenFileName(this, "Open Entity XML", "G://Meine Ablage/__Studium/9. Semester/Bachelorarbeit");
 	//fileLocation = "G:/Meine Ablage/__Studium/9. Semester/Bachelorarbeit/Models/12mic.aemxml";
 
-	// Get Entity
-	myEntity = EmvEntity(fileLocation, languageIdentifier);
-	EmvFileHandler myHandler = EmvFileHandler(fileLocation, languageIdentifier);
+	if (!fileLocations.contains(fileLocation))
+	{
+		fileLocations.append(fileLocation);
+		int newIndex = entityList.size();
+		entityList.insert(newIndex, EmvEntity(fileLocation, languageIdentifier));
+		myEntity = entityList[newIndex];
+		++entityPickerIndex;
+	}
+
+	//EmvFileHandler myHandler = EmvFileHandler(fileLocation, languageIdentifier);
 
 	setView();
 }
@@ -209,4 +230,11 @@ void EmvView::setDebug(bool _isDebug) {
 		languagePicker->setEnabled(false);
 	}
 		
+}
+
+void EmvView::changeEntity() {
+	entityPickerIndex = entityPicker->currentIndex();
+	myEntity = entityList[entityPickerIndex];
+
+	setView();
 }

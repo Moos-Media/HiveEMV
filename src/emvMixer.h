@@ -57,6 +57,7 @@ private:
 	void addMetaData();
 	void addConfigurationControls();
 	void addControlsToPage(int index, int row, int column);
+	int calculateControlIndex(EmvControl control);
 	QMap<int, EmvControl> controls;
 
 };

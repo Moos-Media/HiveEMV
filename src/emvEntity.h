@@ -48,6 +48,7 @@ public:
 
 private:
 	la::avdecc::UniqueIdentifier controlledEntityID;
+	int controlIndexCounter;
 
 
     QDomDocument document;

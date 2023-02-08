@@ -5,6 +5,8 @@ EmvEntity::EmvEntity(){};
 
 EmvEntity::EmvEntity(QString _filename, QString _language)
 {
+	controlIndexCounter = 0;
+
 	//Set Language
 	changeLanguage(_language);
 

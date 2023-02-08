@@ -39,10 +39,14 @@ private slots:
 	void openSettings();
 	void changeLanguage();
 	void settingsFinished(int resultCode);
+	void changeEntity();
 
 private:
 	bool isDebug;
 	bool settingsAreOpen = false;;
 	QString fileLocation;
+	QMap<int, EmvEntity> entityList;
+	QList<QString> fileLocations;
+	int entityPickerIndex;
 	
 };

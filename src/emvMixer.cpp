@@ -184,34 +184,37 @@ void EmvMixer::controlDialChanged() {
 
 	EmvControl activatedControl = controls[index];
 
+	//int controlIndex;
+
+	double controlMinimum = activatedControl.values.at(0).minValue;
+	double controlMaximum = activatedControl.values.at(0).maxValue;
+	int controlStep = activatedControl.values.at(0).stepValue;
+
 	int dialValue = caller->value();
-	int testValue = ownMap(dialValue, 0, 100, -1270, 0);
-	int temp = testValue % 5;
-	testValue = testValue - temp;
+	double mappedValue = ownMap(dialValue, caller->minimum(), caller->maximum(), controlMinimum, controlMaximum);
+	int valueToSend = clampValue(mappedValue, controlMinimum, controlMaximum, controlStep);
+	
 	
 	auto values = la::avdecc::entity::model::LinearValues<la::avdecc::entity::model::LinearValueDynamic<std::int16_t>>();
 
-	
-	auto valueLeft = la::avdecc::entity::model::LinearValueDynamic<std::int16_t>();
-	auto valueRight = la::avdecc::entity::model::LinearValueDynamic<std::int16_t>();
-
-	valueLeft.currentValue = testValue;
-	valueLeft.currentValue = testValue;
-
-	values.addValue(std::move(valueLeft));
-	values.addValue(std::move(valueRight));
+	for (int i = 0; i < activatedControl.valuesCount; ++i)
+	{
+		auto value = la::avdecc::entity::model::LinearValueDynamic<std::int16_t>();
+		value.currentValue = valueToSend;
+		values.addValue(std::move(value));
+	}
 
 	auto& manager = hive::modelsLibrary::ControllerManager::getInstance();
 
 	std::uint64_t id = 5191439808036110618;
-	auto controlledEntity = manager.getControlledEntity(la::avdecc::UniqueIdentifier(id));
+	//auto controlledEntity = manager.getControlledEntity(la::avdecc::UniqueIdentifier(id));
 
 	//Index should be 32 for Headphone Gain
 	//37 combo 65 müsste 
-	manager.setControlValues(la::avdecc::UniqueIdentifier(id), 65, la::avdecc::entity::model::ControlValues{ std::move(values) });
+	//manager.setControlValues(la::avdecc::UniqueIdentifier(id), 65, la::avdecc::entity::model::ControlValues{ std::move(values) });
 	
 	
-	qDebug() << "Value mapped: " << testValue;
+	qDebug() << "Value mapped: " << valueToSend;
 }
 void EmvMixer::controlSliderChanged() {
 	QCheckBox* caller = qobject_cast<QCheckBox*>(sender());
@@ -895,7 +898,19 @@ void EmvMixer::addControlsToPage(int index, int row, int column) {
 
 }
 
-/* void EmvMixer::sendControlData(node, valuuToSend)
+int EmvMixer::calculateControlIndex(EmvControl control) {
+	int index = 0;
+	auto currentConfig = myEntity->getCurrentConfiguration();
+
+	//Add Config and Audio Unit indexes
+	index = index + currentConfig.getControlsAmount() + currentConfig.getAudioUnit(0).controlsCount;
+
+	//compute index of control
+	//index = index + currentConfig.getAudioUnit(0).getExternalPorts("IN").at(0).;
+
+	return index;
+}
+	/* void EmvMixer::sendControlData(node, valuuToSend)
 {
 	/*
 	* get control index from node

@@ -3,9 +3,9 @@
 
 using namespace std;
 
-int ownMap(double, double, double, double, double);
+int ownMap(double n, double start1, double stop1, double start2, double stop2);
 
-int clampValue(int, int, int, int);
+int clampValue(int value, int min, int max, int step);
 
 string panMapping(int);
 

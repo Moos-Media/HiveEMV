@@ -1,8 +1,9 @@
 #include "emvConfiguration.h"
 #include <QDebug>
 
-EmvConfiguration::EmvConfiguration(QDomNode _parent)
+EmvConfiguration::EmvConfiguration(QDomNode _parent, int* controlsCounterReference)
 {
+	controlsCounter = controlsCounterReference;
     parent = _parent;
 	controlsAmount = 0;
 	isDebug = true;
@@ -165,7 +166,9 @@ void EmvConfiguration::xmlsetControls() {
 	//Create Config Instances
 	for (int i = 0; i < controlsList.count(); ++i)
 	{
-		controls.insert(i, EmvControl(controlsList.at(i)));
+		int controlCounterValue = *controlsCounter;
+		controls.insert(i, EmvControl(controlsList.at(i), controlCounterValue));
+		++controlsCounter;
 		controlsAmount += 1;
 	}
 }
@@ -184,7 +187,7 @@ void EmvConfiguration::xmlsetJacks() {
 	//Create Config Instances
 	for (int i = 0; i < jackList.count(); ++i)
 	{
-		input.insert(i, EmvJack(jackList.at(i)));
+		input.insert(i, EmvJack(jackList.at(i), controlsCounter));
 	}
 
 	//OUTPUT JACKS
@@ -197,7 +200,7 @@ void EmvConfiguration::xmlsetJacks() {
 	//Create Config Instances
 	for (int i = 0; i < jackList.count(); ++i)
 	{
-		output.insert(i, EmvJack(jackList.at(i)));
+		output.insert(i, EmvJack(jackList.at(i), controlsCounter));
 	}
 
 
@@ -220,6 +223,6 @@ void EmvConfiguration::xmlsetAudioUnits() {
 	//Create Config Instances
 	for (int i = 0; i < audioUnitsList.count(); ++i)
 	{
-		audioUnits.append(EmvAudioUnit(audioUnitsList.at(i)));
+		audioUnits.append(EmvAudioUnit(audioUnitsList.at(i), controlsCounter));
 	}
 }

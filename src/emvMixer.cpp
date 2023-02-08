@@ -7,7 +7,7 @@
 
 
 
-EmvMixer::EmvMixer(EmvEntity *entity, QString type, QWidget *parent)
+EmvMixer::EmvMixer(EmvEntity *entity, QString _type, QWidget *parent)
 	: QWidget(parent)
 {
 	setupUi(this);
@@ -15,16 +15,22 @@ EmvMixer::EmvMixer(EmvEntity *entity, QString type, QWidget *parent)
 	// Setup Header Styling
 	headerStyle = "font-weight: bold; font-size: 8pt; text-align: center;";
 
+	type = _type.toUpper();
+
 	myEntity = entity;
+	controlledEntityID = myEntity->getLaEntityID();
+	qDebug() << controlledEntityID;
+
+
 	channelAmount = 0;
 
-	if (type.toUpper() == "METADATA")
+	if (type == "METADATA")
 		addMetaData();
-	else if (type.toUpper() == "JACKSIN")
+	else if (type == "JACKSIN")
 		addJacks("IN");
-	else if (type.toUpper() == "JACKSOUT")
+	else if (type == "JACKSOUT")
 		addJacks("OUT");
-	else if (type.toUpper() == "CONFIGCONTROLS")
+	else if (type == "CONFIGCONTROLS")
 		addConfigurationControls();
 	else
 	{
@@ -138,11 +144,27 @@ void EmvMixer::updateLevelsMute()
 }
 
 void EmvMixer::controlCheckBoxChanged() {
-	QCheckBox *caller = qobject_cast<QCheckBox*>(sender());
+	QCheckBox* caller = qobject_cast<QCheckBox*>(sender());
 
 	int index = mixerArea->indexOf(caller);
+	int controlIndex = calculateControlIndex(index);
 
 	EmvControl activatedControl = controls[index];
+
+	auto& manager = hive::modelsLibrary::ControllerManager::getInstance();
+
+	int valueToSend = (caller->isChecked()) ? (255) : (0);
+
+	auto values = la::avdecc::entity::model::LinearValues<la::avdecc::entity::model::LinearValueDynamic<std::int8_t>>();
+
+	for (int i = 0; i < activatedControl.valuesCount; ++i)
+	{
+		auto value = la::avdecc::entity::model::LinearValueDynamic<std::int8_t>();
+		value.currentValue = valueToSend;
+		values.addValue(std::move(value));
+	}
+
+	manager.setControlValues(controlledEntityID, controlIndex, la::avdecc::entity::model::ControlValues{ std::move(values) });	
 }
 void EmvMixer::controlPushButtonChanged() {
 	QPushButton* caller = qobject_cast<QPushButton*>(sender());
@@ -181,10 +203,9 @@ void EmvMixer::controlDialChanged() {
 	QDial* caller = qobject_cast<QDial*>(sender());
 
 	int index = mixerArea->indexOf(caller);
+	int controlIndex = calculateControlIndex(index);
 
 	EmvControl activatedControl = controls[index];
-
-	//int controlIndex;
 
 	double controlMinimum = activatedControl.values.at(0).minValue;
 	double controlMaximum = activatedControl.values.at(0).maxValue;
@@ -193,28 +214,39 @@ void EmvMixer::controlDialChanged() {
 	int dialValue = caller->value();
 	double mappedValue = ownMap(dialValue, caller->minimum(), caller->maximum(), controlMinimum, controlMaximum);
 	int valueToSend = clampValue(mappedValue, controlMinimum, controlMaximum, controlStep);
-	
-	
-	auto values = la::avdecc::entity::model::LinearValues<la::avdecc::entity::model::LinearValueDynamic<std::int16_t>>();
-
-	for (int i = 0; i < activatedControl.valuesCount; ++i)
-	{
-		auto value = la::avdecc::entity::model::LinearValueDynamic<std::int16_t>();
-		value.currentValue = valueToSend;
-		values.addValue(std::move(value));
-	}
 
 	auto& manager = hive::modelsLibrary::ControllerManager::getInstance();
+	
+	if (activatedControl.controlValueType == "0001")
+	{
+		auto values = la::avdecc::entity::model::LinearValues<la::avdecc::entity::model::LinearValueDynamic<std::int8_t>>();
 
-	std::uint64_t id = 5191439808036110618;
-	//auto controlledEntity = manager.getControlledEntity(la::avdecc::UniqueIdentifier(id));
+		for (int i = 0; i < activatedControl.valuesCount; ++i)
+		{
+			auto value = la::avdecc::entity::model::LinearValueDynamic<std::int8_t>();
+			value.currentValue = valueToSend;
+			values.addValue(std::move(value));
+		}
+
+		manager.setControlValues(controlledEntityID, controlIndex, la::avdecc::entity::model::ControlValues{ std::move(values) });
+	}
+	else if (activatedControl.controlValueType == "0002")
+	{
+		auto values = la::avdecc::entity::model::LinearValues<la::avdecc::entity::model::LinearValueDynamic<std::int16_t>>();
+
+		for (int i = 0; i < activatedControl.valuesCount; ++i)
+		{
+			auto value = la::avdecc::entity::model::LinearValueDynamic<std::int16_t>();
+			value.currentValue = valueToSend;
+			values.addValue(std::move(value));
+		}
+
+		manager.setControlValues(controlledEntityID, controlIndex, la::avdecc::entity::model::ControlValues{ std::move(values) });
+	}
+	qDebug() << activatedControl.controlValueType;
 
 	//Index should be 32 for Headphone Gain
 	//37 combo 65 müsste 
-	//manager.setControlValues(la::avdecc::UniqueIdentifier(id), 65, la::avdecc::entity::model::ControlValues{ std::move(values) });
-	
-	
-	qDebug() << "Value mapped: " << valueToSend;
 }
 void EmvMixer::controlSliderChanged() {
 	QCheckBox* caller = qobject_cast<QCheckBox*>(sender());
@@ -228,13 +260,6 @@ void EmvMixer::controlSliderChanged() {
 
 void EmvMixer::addChannels()
 {
-	auto& manager = hive::modelsLibrary::ControllerManager::getInstance();
-	auto controlledEntity = manager.getControlledEntity(controlledEntityID);
-	//auto index = la::avdecc::entity::model::control
-
-	//manager.setControlValues(controlledEntityID, 0, 0);
-
-
 	for (int i = 0; i < channelAmount; i++)
 	{
 		QString headerStyle = "font-weight: bold; font-size: 12pt; text-align: center;";
@@ -324,6 +349,7 @@ void EmvMixer::addChannels()
 
 void EmvMixer::addJacks(QString _dir) {
 	int controlIndexCounter = 0;
+	int absoluteIndexCounter = 0;
 	for (int i = 0; i < myEntity->getCurrentConfiguration().getJackAmount(_dir.toUpper()); i++)
 	{
 		int newRow = 0;
@@ -467,8 +493,10 @@ void EmvMixer::addJacks(QString _dir) {
 			++controlIndexCounter;
 			addControlsToPage(currentControl.controlTypeIndex, newRow, newColumn);
 			controls.insert(controlIndexCounter, currentControl);
+			controlIndexLookupTable.insert(controlIndexCounter, absoluteIndexCounter);
 			++newRow;
 			++controlIndexCounter;
+			++absoluteIndexCounter;
 		}
 
 		//----------------------------------------------------------------- Port Controls
@@ -490,8 +518,10 @@ void EmvMixer::addJacks(QString _dir) {
 					++controlIndexCounter;
 					addControlsToPage(currentPort.controls[z].controlTypeIndex, newRow, newColumn);
 					controls.insert(controlIndexCounter, currentPort.controls[z]);
+					controlIndexLookupTable.insert(controlIndexCounter, absoluteIndexCounter);
 					++newRow;
 					++controlIndexCounter;
+					++absoluteIndexCounter;
 				}
 			}
 		}
@@ -716,6 +746,7 @@ void EmvMixer::addConfigurationControls() {
 		addControlsToPage(current.getControl(i).controlTypeIndex, 1, newColumn);
 		++controlIndexCounter;
 		controls.insert(controlIndexCounter, current.getControl(i));
+		controlIndexLookupTable.insert(controlIndexCounter, i);
 	}
 }
 
@@ -805,7 +836,7 @@ void EmvMixer::addControlsToPage(int index, int row, int column) {
 		else
 		{
 			QSlider* gain = new QSlider();
-			QObject::connect(gain, SIGNAL(sliderReleased()), this, SLOT(controlSliderChanged()));
+			QObject::connect(gain, SIGNAL(sliderReleased()), this, SLOT(controlDialChanged()));
 			mixerArea->addWidget(gain, row, column);
 		}
 	}
@@ -898,15 +929,28 @@ void EmvMixer::addControlsToPage(int index, int row, int column) {
 
 }
 
-int EmvMixer::calculateControlIndex(EmvControl control) {
-	int index = 0;
-	auto currentConfig = myEntity->getCurrentConfiguration();
+int EmvMixer::calculateControlIndex(int controlIndex) {
+	int inMixerOffset = controlIndexLookupTable[controlIndex];
+	int index = -1;
+	int config = myEntity->getCurrentConfiguration().getControlsAmount();
+	int audioUnit = myEntity->getCurrentConfiguration().getAudioUnit(0).controlsCount;
+	int jacksin = 0;
 
-	//Add Config and Audio Unit indexes
-	index = index + currentConfig.getControlsAmount() + currentConfig.getAudioUnit(0).controlsCount;
+	int jacksInAmount = myEntity->getCurrentConfiguration().getAudioUnit(0).getExternalPorts("IN").size();
 
-	//compute index of control
-	//index = index + currentConfig.getAudioUnit(0).getExternalPorts("IN").at(0).;
+	for (int i = 0; i < jacksInAmount; ++i)
+	{
+		auto currentJack = myEntity->getCurrentConfiguration().getAudioUnit(0).getExternalPorts("IN").at(i);
+
+		jacksin += currentJack.controlsCount;
+	}
+
+	if (type == "JACKSIN")
+		index = config + audioUnit + inMixerOffset;
+	else if (type == "JACKSOUT")
+		index = config + audioUnit + jacksin + inMixerOffset;
+	else if (type == "CONFIGCONTROLS")
+		index = inMixerOffset;
 
 	return index;
 }

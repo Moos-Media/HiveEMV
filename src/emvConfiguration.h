@@ -7,9 +7,9 @@
 class EmvConfiguration
 {
 public:
-    EmvConfiguration(QDomNode _parent);
+    EmvConfiguration(QDomNode _parent, int* controlsCounterReference);
 	EmvConfiguration(la::avdecc::UniqueIdentifier _entityID,
-		la::avdecc::controller::model::ConfigurationNode _node);
+	la::avdecc::controller::model::ConfigurationNode _node);
     EmvConfiguration();
     QString getLocaleText(QString langiden, int index1, int index2);
 	QString getConfigurationDescription(QString langiden);
@@ -35,6 +35,7 @@ private:
 	void xmlsetAudioUnits();
 	QMap<int, EmvControl> controls;
 	int controlsAmount;
+	int* controlsCounter;
 	QMap<int, EmvJack> input;
 	QMap<int, EmvJack> output;
 	QList<EmvAudioUnit> audioUnits;

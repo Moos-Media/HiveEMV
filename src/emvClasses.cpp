@@ -3,9 +3,9 @@
 #include <QDebug>
 #include "emvUtils.h"
 
-EmvControl::EmvControl(QDomNode _parent){
+EmvControl::EmvControl(QDomNode _parent, int index){
 	isDebug = true;
-
+	controlIndex = index;
 	//Set Parent Element
 	parent = _parent.toElement();
 
@@ -56,8 +56,6 @@ EmvControl::EmvControl(la::avdecc::UniqueIdentifier _entityID, la::avdecc::contr
 	resetTime = QString::number(_node.staticModel->resetTime);
 	node = &_node;
 	entityID = _entityID;
-	index = _node.staticModel->signalIndex;
-	qDebug() << index;
 }
 
 EmvControlValues::EmvControlValues(QDomNode _parent) {
@@ -81,7 +79,9 @@ EmvControlValues::EmvControlValues() {}
 
 EmvJack::EmvJack() {}
 
-EmvJack::EmvJack(QDomNode _parent) {
+EmvJack::EmvJack(QDomNode _parent, int* controlReference) {
+	controlIndex = controlReference;
+
 	//Set Parent Node
 	parent = _parent.toElement();
 
@@ -106,7 +106,8 @@ EmvJack::EmvJack(QDomNode _parent) {
 	controlsCount = 0;
 	for (int i = 0; i < controlsList.count(); ++i)
 	{
-		controls.insert(i, EmvControl(controlsList.at(i)));
+		controls.insert(i, EmvControl(controlsList.at(i), *controlIndex));
+		++controlIndex;
 		++controlsCount;
 
 	}
@@ -114,7 +115,8 @@ EmvJack::EmvJack(QDomNode _parent) {
 
 EmvAudioUnit::EmvAudioUnit() {}
 
-EmvAudioUnit::EmvAudioUnit(QDomNode _parent) {
+EmvAudioUnit::EmvAudioUnit(QDomNode _parent, int* controlReference) {
+	controlIndex = controlReference;
 
 	//Set Parent Element
 	parent = _parent.toElement();
@@ -140,7 +142,9 @@ EmvAudioUnit::EmvAudioUnit(QDomNode _parent) {
 		controlsCount = 0;
 		for (int i = 0; i < controlsNode.toElement().elementsByTagName("control").count(); ++i)
 		{
-			controls.insert(i, EmvControl(controlsNode.toElement().elementsByTagName("control").at(i)));
+			int controlValue = *controlIndex;
+			controls.insert(i, EmvControl(controlsNode.toElement().elementsByTagName("control").at(i), controlValue));
+			++controlIndex;
 			++controlsCount;
 		}
 	}
@@ -155,7 +159,7 @@ EmvAudioUnit::EmvAudioUnit(QDomNode _parent) {
 		inputExternalPortsCount = 0;
 		for (int i = 0; i < inputExternalNode.toElement().elementsByTagName("external_port").count(); ++i)
 		{
-			inputExternalPorts.insert(i, EmvPort(inputExternalNode.toElement().elementsByTagName("external_port").at(i), "IN"));
+			inputExternalPorts.insert(i, EmvPort(inputExternalNode.toElement().elementsByTagName("external_port").at(i), "IN", controlIndex));
 			++inputExternalPortsCount;
 		}
 	}
@@ -169,7 +173,7 @@ EmvAudioUnit::EmvAudioUnit(QDomNode _parent) {
 		inputExternalPortsCount = 0;
 		for (int i = 0; i < outputExternalNode.toElement().elementsByTagName("external_port").count(); ++i)
 		{
-			outputExternalPorts.insert(i, EmvPort(outputExternalNode.toElement().elementsByTagName("external_port").at(i), "OUT"));
+			outputExternalPorts.insert(i, EmvPort(outputExternalNode.toElement().elementsByTagName("external_port").at(i), "OUT", controlIndex));
 			++outputExternalPortsCount;
 		}
 	}
@@ -186,7 +190,9 @@ QList<EmvPort> EmvAudioUnit::getExternalPorts(QString _dir) {
 
 EmvPort::EmvPort() {}
 
-EmvPort::EmvPort(QDomNode _parent, QString _dir) {
+EmvPort::EmvPort(QDomNode _parent, QString _dir, int* controlReference) {
+	controlIndex = controlReference;
+
 	//Set Parent + Direction
 	parent = _parent.toElement();
 	dir = _dir.toUpper();
@@ -212,7 +218,9 @@ EmvPort::EmvPort(QDomNode _parent, QString _dir) {
 	controlsCount = 0;
 	for (int i = 0; i < controlsNode.toElement().elementsByTagName("control").count(); ++i)
 	{
-		controls.insert(i, EmvControl(controlsNode.toElement().elementsByTagName("control").at(i)));
+		int controlIndexValue = *controlIndex;
+		controls.insert(i, EmvControl(controlsNode.toElement().elementsByTagName("control").at(i), controlIndexValue));
+		++controlIndex;
 		++controlsCount;
 	}
 }

@@ -311,6 +311,16 @@ void EmvEntity::xmlsetEntityMetaData()
     xmlReadStringFromNode(root.elementsByTagName("current_configuration").at(0).toElement());
     xmlReadStringFromNode(root.elementsByTagName("vendor_name").at(0).toElement());
     xmlReadStringFromNode(root.elementsByTagName("model_name").at(0).toElement());
+
+	//Get LA Entity ID
+	QString idReadFromNode = entityData["entity_id"];
+
+	std::stringstream ss;
+	std::uint64_t idInt;
+
+	ss << std::hex << idReadFromNode.toStdString();
+	ss >> idInt;
+	controlledEntityID = la::avdecc::UniqueIdentifier(idInt);
 }
 
 void EmvEntity::xmlsetConfigurations()
@@ -320,7 +330,7 @@ void EmvEntity::xmlsetConfigurations()
 
     //Create Config Instances
 	for (int i = 0; i < configurationsRoot.toElement().elementsByTagName("configuration").count(); ++i) {
-		entityConfigurations.insert(i, EmvConfiguration(configurationsRoot.childNodes().at(i)));
+		entityConfigurations.insert(i, EmvConfiguration(configurationsRoot.childNodes().at(i), &controlIndexCounter));
     }
 }
 

@@ -22,7 +22,7 @@ private:
 class EmvControl
 {
 public:
-	EmvControl(QDomNode _parent);
+	EmvControl(QDomNode _parent, int index);
 	EmvControl(la::avdecc::UniqueIdentifier _entityID,
 		la::avdecc::controller::model::ControlNode _node);
 	EmvControl();
@@ -48,7 +48,7 @@ public:
 	QString controlName;
 	la::avdecc::controller::model::ControlNode * node;
 	la::avdecc::UniqueIdentifier entityID;
-	int index;
+	int controlIndex;
 
 private:
 };
@@ -57,7 +57,7 @@ class EmvJack
 {
 public:
 	EmvJack();
-	EmvJack(QDomNode _parent);
+	EmvJack(QDomNode _parent, int* controlReference);
 
 	QDomElement parent;
 	QString direction;
@@ -66,13 +66,14 @@ public:
 	int type;
 	QList<EmvControl> controls;
 	int controlsCount;
+	int* controlIndex;
 };
 
 class EmvPort
 {
 public:
 	EmvPort();
-	EmvPort(QDomNode _parent, QString _dir);
+	EmvPort(QDomNode _parent, QString _dir, int* controlReference);
 
 	QDomElement parent;
 	QString dir;
@@ -80,6 +81,7 @@ public:
 	QString portFlags;
 	QList<EmvControl> controls;
 	int controlsCount;
+	int* controlIndex;
 	QString signalType;
 	QString signalIndex;
 	QString signalOutput;
@@ -91,7 +93,7 @@ class EmvAudioUnit
 {
 public:
 	EmvAudioUnit();
-	EmvAudioUnit(QDomNode _parent);
+	EmvAudioUnit(QDomNode _parent, int* controlReference);
 
 	QDomElement parent;
 	int descriptionIndex[2];
@@ -104,6 +106,7 @@ public:
 
 	int inputExternalPortsCount;
 	int outputExternalPortsCount;
+	int* controlIndex;
 
 	QList<EmvPort> getExternalPorts(QString _dir);
 

@@ -15,6 +15,7 @@ public:
 	int stepValue;
 	int currentValue;
 	int defaultValue;
+	QList<QString> options;
 
 private:
 };
@@ -40,6 +41,7 @@ public:
 	QString signalIndex;
 	QString signalOutput;
 	QList<EmvControlValues> values;
+	
 
 	int valuesCount;
 	int controlTypeIndex;

@@ -33,7 +33,7 @@ private slots:
 	void controlCheckBoxChanged();
 	void controlPushButtonChanged();
 	void controlDialChanged();
-	void controlSliderChanged();
+	void controlComboBoxChanged();
 
 private:
 	//Gain
@@ -56,9 +56,10 @@ private:
 	void addJacks(QString _dir);
 	void addMetaData();
 	void addConfigurationControls();
-	void addControlsToPage(int index, int row, int column);
+	void addControlsToPage(EmvControl control, int row, int column);
 	int calculateControlIndex(int controlIndex);
 	QMap<int, EmvControl> controls;
+	QMap<int, bool> states;
 	QMap<int, int> controlIndexLookupTable;
 	QString type;
 

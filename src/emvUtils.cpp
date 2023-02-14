@@ -241,8 +241,28 @@ int getControlTypeIndexFromType(QString input)
 		return 33;
 	else if (input == "90e0f00000010004")
 		return 34;
+	else if (input == "480bb2fffed40013")
+		return -13;
+	else if (input == "480bb2fffed40012")
+		return -12;
+	else if (input == "480bb2fffed40011")
+		return -11;
 
 	else
 		return -1;
 
+}
+
+int stringToIntComplement(QString input)
+{
+	int output;
+
+	//Convert to int
+	bool temp = false;
+	int16_t value = input.toInt(&temp, 16);
+	int16_t value2 = -(int)value;
+
+	//Comply with 2s complement
+	output = (value < 32767) ? value : -1 * value2;
+	return output;
 }

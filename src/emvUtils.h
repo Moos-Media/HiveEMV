@@ -20,3 +20,5 @@ double getSamplingRateFromNode(QDomElement node);
 QString convertDecToHexString(int input, int targetLength);
 
 int getControlTypeIndexFromType(QString input);
+
+int stringToIntComplement(QString input);

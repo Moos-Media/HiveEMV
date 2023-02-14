@@ -61,7 +61,7 @@ private:
     void xmlReadStringFromNode(QDomElement node);
 
 	QString getEntityDataString(QString _key);
-		int getEntityDataInt(QString _key);
+		int getEntityDataInt(QString _key, int base);
 	QStringList parseCapabilites(QString rawData);
 
 

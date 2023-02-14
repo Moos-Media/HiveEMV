@@ -60,19 +60,31 @@ EmvControl::EmvControl(la::avdecc::UniqueIdentifier _entityID, la::avdecc::contr
 
 EmvControlValues::EmvControlValues(QDomNode _parent) {
 	//Set Parent Element
-	parent = _parent.toElement().firstChild().toElement();
+	if (_parent.toElement().tagName() != "value")
+		parent = _parent.toElement().firstChild().toElement();
+	else
+		parent = _parent.toElement();
 
 	//Set Type
 	type = parent.attribute("xsi:type");
 
 	//Set Values
-	bool temp;
 	units = getStringByTagName(parent, "units");
-	minValue = getStringByTagName(parent, "minimum").toInt(&temp, 16);
-	maxValue = getStringByTagName(parent, "maximum").toInt(&temp, 16);
-	stepValue = getStringByTagName(parent, "step").toInt(&temp, 16);
-	currentValue = getStringByTagName(parent, "current").toInt(&temp, 16);
-	defaultValue = getStringByTagName(parent, "default").toInt(&temp, 16);
+	minValue = stringToIntComplement(getStringByTagName(parent, "minimum"));
+	maxValue = stringToIntComplement(getStringByTagName(parent, "maximum"));
+	stepValue = stringToIntComplement(getStringByTagName(parent, "step"));
+	currentValue = stringToIntComplement(getStringByTagName(parent, "current"));
+	defaultValue = stringToIntComplement(getStringByTagName(parent, "default"));
+
+	if (type == "T000b")
+	{
+		auto optionNodes = parent.toElement().elementsByTagName("options").at(0).childNodes();
+
+		for (int i = 0; i < optionNodes.count(); ++i)
+		{
+			options.append(optionNodes.at(i).toElement().text());
+		}
+	}
 }
 
 EmvControlValues::EmvControlValues() {}

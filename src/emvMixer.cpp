@@ -12,6 +12,8 @@ EmvMixer::EmvMixer(EmvEntity *entity, QString _type, QWidget *parent)
 {
 	setupUi(this);
 
+	mixerArea->setAlignment(Qt::AlignTop | Qt::AlignLeft);
+
 	// Setup Header Styling
 	headerStyle = "font-weight: bold; font-size: 8pt; text-align: center;";
 
@@ -169,38 +171,59 @@ void EmvMixer::controlCheckBoxChanged() {
 void EmvMixer::controlPushButtonChanged() {
 	QPushButton* caller = qobject_cast<QPushButton*>(sender());
 
+	bool state;
+
 	int index = mixerArea->indexOf(caller);
+	int controlIndex = calculateControlIndex(index);
 
 	EmvControl activatedControl = controls[index];
 
 	auto& manager = hive::modelsLibrary::ControllerManager::getInstance();
 	auto controlledEntity = manager.getControlledEntity(myEntity->getLaEntityID());
 
-
-	auto values = la::avdecc::entity::model::LinearValues<la::avdecc::entity::model::LinearValueDynamic<std::uint8_t>>();
-	auto value = la::avdecc::entity::model::LinearValueDynamic<std::uint8_t>();
-	if (isBlinking)
-		value.currentValue = 0;
+	if (states.contains(index))
+		 state = states[index];
 	else
-		value.currentValue = 255;
+	{
+		 state = false;
+		 states.insert(index, state);
+	}
 
-	isBlinking = !isBlinking;
+	int valueToSend = (state) ? (activatedControl.values.value(0).minValue) : (activatedControl.values.value(0).maxValue);
+	states[index] = !state;
 
-	auto* const settings = qApp->property(settings::SettingsManager::PropertyName).value<settings::SettingsManager*>();
-	settings->setValue("emvMixer", isBlinking);
+	qDebug() << myEntity->getCurrentConfiguration().getControl(0).controlValueType;
+	qDebug() << activatedControl.controlValueType;
 
-	values.addValue(std::move(value));
+	if (activatedControl.controlValueType == "0001")
+	{
+		 auto values = la::avdecc::entity::model::LinearValues<la::avdecc::entity::model::LinearValueDynamic<std::int8_t>>();
 
-	manager.setControlValues(myEntity->getLaEntityID(), 0, la::avdecc::entity::model::ControlValues{ std::move(values) });
-		/*
-	auto desc = node.staticModel->localizedDescription;
-	auto stringtest = controlledEntity.get()->getLocalizedString(desc);
+		 for (int i = 0; i < activatedControl.valuesCount; ++i)
+		 {
+			 auto value = la::avdecc::entity::model::LinearValueDynamic<std::int8_t>();
+			 value.currentValue = valueToSend;
+			 values.addValue(std::move(value));
+		 }
 
-	qDebug() << "Node: " << QString::fromStdString(stringtest.str());*/
+		 manager.setControlValues(controlledEntityID, controlIndex, la::avdecc::entity::model::ControlValues{ std::move(values) });
+	}
+	else if (activatedControl.controlValueType == "0002")
+	{
+		 auto values = la::avdecc::entity::model::LinearValues<la::avdecc::entity::model::LinearValueDynamic<std::int16_t>>();
 
+		 for (int i = 0; i < activatedControl.valuesCount; ++i)
+		 {
+			 auto value = la::avdecc::entity::model::LinearValueDynamic<std::int16_t>();
+			 value.currentValue = valueToSend;
+			 values.addValue(std::move(value));
+		 }
+
+		 manager.setControlValues(controlledEntityID, controlIndex, la::avdecc::entity::model::ControlValues{ std::move(values) });
+	}
 }
 void EmvMixer::controlDialChanged() {
-	QDial* caller = qobject_cast<QDial*>(sender());
+	QAbstractSlider* caller = qobject_cast<QAbstractSlider*>(sender());
 
 	int index = mixerArea->indexOf(caller);
 	int controlIndex = calculateControlIndex(index);
@@ -248,12 +271,30 @@ void EmvMixer::controlDialChanged() {
 	//Index should be 32 for Headphone Gain
 	//37 combo 65 müsste 
 }
-void EmvMixer::controlSliderChanged() {
-	QCheckBox* caller = qobject_cast<QCheckBox*>(sender());
+void EmvMixer::controlComboBoxChanged() {
+	QComboBox* caller = qobject_cast<QComboBox*>(sender());
 
 	int index = mixerArea->indexOf(caller);
+	int controlIndex = calculateControlIndex(index);
 
 	EmvControl activatedControl = controls[index];
+	auto& manager = hive::modelsLibrary::ControllerManager::getInstance();
+
+	int boxIndex = caller->currentIndex();
+
+	if (activatedControl.controlValueType == "000b")
+	{
+		auto values = la::avdecc::entity::model::LinearValues<la::avdecc::entity::model::LinearValueDynamic<std::uint8_t>>();
+
+		for (int i = 0; i < activatedControl.valuesCount; ++i)
+		{
+			auto value = la::avdecc::entity::model::LinearValueDynamic<std::uint8_t>();
+			value.currentValue = boxIndex;
+			values.addValue(std::move(value));
+		}
+
+		manager.setControlValues(controlledEntityID, controlIndex, la::avdecc::entity::model::ControlValues{ std::move(values) });
+	}
 }
 
 //HELPERS--------------------------------------------------------------------------------------------------------
@@ -491,7 +532,7 @@ void EmvMixer::addJacks(QString _dir) {
 			mixerArea->addWidget(new QLabel(myEntity->getLocale(indexx, indexy)), newRow, newColumn);
 			++newRow;
 			++controlIndexCounter;
-			addControlsToPage(currentControl.controlTypeIndex, newRow, newColumn);
+			addControlsToPage(currentControl, newRow, newColumn);
 			controls.insert(controlIndexCounter, currentControl);
 			controlIndexLookupTable.insert(controlIndexCounter, absoluteIndexCounter);
 			++newRow;
@@ -516,7 +557,7 @@ void EmvMixer::addJacks(QString _dir) {
 					mixerArea->addWidget(new QLabel(myEntity->getLocale(indexx, indexy)), newRow, newColumn);
 					++newRow;
 					++controlIndexCounter;
-					addControlsToPage(currentPort.controls[z].controlTypeIndex, newRow, newColumn);
+					addControlsToPage(currentPort.controls[z], newRow, newColumn);
 					controls.insert(controlIndexCounter, currentPort.controls[z]);
 					controlIndexLookupTable.insert(controlIndexCounter, absoluteIndexCounter);
 					++newRow;
@@ -743,14 +784,16 @@ void EmvMixer::addConfigurationControls() {
 		mixerArea->addWidget(descLabel, 0, newColumn);
 		++controlIndexCounter;
 
-		addControlsToPage(current.getControl(i).controlTypeIndex, 1, newColumn);
-		++controlIndexCounter;
+		addControlsToPage(current.getControl(i), 1, newColumn);
+		
 		controls.insert(controlIndexCounter, current.getControl(i));
 		controlIndexLookupTable.insert(controlIndexCounter, i);
+		++controlIndexCounter;
 	}
 }
 
-void EmvMixer::addControlsToPage(int index, int row, int column) {
+void EmvMixer::addControlsToPage(EmvControl control, int row, int column) {
+	int index = control.controlTypeIndex;
 	auto* const settings = qApp->property(settings::SettingsManager::PropertyName).value<settings::SettingsManager*>();
 
 	QPushButton* identify = new QPushButton("Identify");
@@ -763,8 +806,6 @@ void EmvMixer::addControlsToPage(int index, int row, int column) {
 	QObject::connect(delay, SIGNAL(sliderReleased()), this, SLOT(controlDialChanged()));
 	QDial* srcMode = new QDial();
 	QObject::connect(srcMode, SIGNAL(sliderReleased()), this, SLOT(controlDialChanged()));
-	QPushButton* snapshot = new QPushButton("Snapshot");
-	QObject::connect(snapshot, SIGNAL(clicked()), this, SLOT(controlPushButtonChanged()));
 	QPushButton* pwrFrequency = new QPushButton("Power Line Frequency");
 	QObject::connect(pwrFrequency, SIGNAL(clicked()), this, SLOT(controlPushButtonChanged()));
 	QPushButton* pwrStatus = new QPushButton("Power Status");
@@ -819,7 +860,7 @@ void EmvMixer::addControlsToPage(int index, int row, int column) {
 		}
 		else
 		{
-			QPushButton* enable = new QPushButton();
+			QPushButton* enable = new QPushButton("Toggle");
 			QObject::connect(enable, SIGNAL(clicked()), this, SLOT(controlPushButtonChanged()));
 			mixerArea->addWidget(enable, row, column);
 		}
@@ -850,7 +891,7 @@ void EmvMixer::addControlsToPage(int index, int row, int column) {
 		}
 		else
 		{
-			QPushButton* invert = new QPushButton();
+			QPushButton* invert = new QPushButton("Toggle");
 			QObject::connect(invert, SIGNAL(clicked()), this, SLOT(controlPushButtonChanged()));
 			mixerArea->addWidget(invert, row, column);
 		}
@@ -865,10 +906,38 @@ void EmvMixer::addControlsToPage(int index, int row, int column) {
 		}
 		else
 		{
-			QPushButton* phantomPower = new QPushButton();
+			QPushButton* phantomPower = new QPushButton("Toggle");
 			QObject::connect(phantomPower, SIGNAL(clicked()), this, SLOT(controlPushButtonChanged()));
 			mixerArea->addWidget(phantomPower, row, column);
 		}
+	}
+	else if (index == 8)
+	{
+		QString text = "Preset: ";
+		int upperBound = control.values.at(0).maxValue;
+
+		QComboBox* preset = new QComboBox();
+		for (int i = 0; i < upperBound; i++)
+		{
+			preset->addItem(text.append(QString::number(i)));
+			text = "Preset: ";
+		}
+		mixerArea->addWidget(preset, row, column);
+		QObject::connect(preset, SIGNAL(currentIndexChanged(int)), this, SLOT(controlComboBoxChanged()));
+	}
+	else if (index < -10)
+	{
+		QString text = "Option: ";
+		int upperBound = control.values.at(0).options.count();
+		qDebug() << "upper Bound:" <<upperBound;
+		QComboBox* options = new QComboBox();
+		for (int i = 0; i < upperBound; i++)
+		{
+			options->addItem(text.append(QString::number(i)));
+			text = "Option: ";
+		}
+		mixerArea->addWidget(options, row, column);
+		QObject::connect(options, SIGNAL(currentIndexChanged(int)), this, SLOT(controlComboBoxChanged()));
 	}
 	else if(index == 1)
 		mixerArea->addWidget(identify, row, column);
@@ -880,8 +949,6 @@ void EmvMixer::addControlsToPage(int index, int row, int column) {
 		mixerArea->addWidget(delay, row, column);
 	else if(index == 7)
 		mixerArea->addWidget(srcMode, row, column);
-	else if(index == 8)
-		mixerArea->addWidget(snapshot, row, column);
 	else if(index == 9)
 		mixerArea->addWidget(pwrFrequency, row, column);
 	else if(index == 10)

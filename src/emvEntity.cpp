@@ -101,7 +101,7 @@ QString EmvEntity::getEntityCapabilities()
 
 int EmvEntity::getMaxStreamSources()
 {
-	return getEntityDataInt("talker_stream_sources");
+	return getEntityDataInt("talker_stream_sources", 16);
 }
 
 QStringList EmvEntity::getTalkerCapabilities()
@@ -112,7 +112,7 @@ QStringList EmvEntity::getTalkerCapabilities()
 
 int EmvEntity::getMaxStreamSinks()
 {
-	return getEntityDataInt("listener_stream_sinks");
+	return getEntityDataInt("listener_stream_sinks", 16);
 }
 
 QStringList EmvEntity::getListenerCapabilities()
@@ -209,12 +209,13 @@ QString EmvEntity::getEntityDataString(QString _key)
 		return "Not Found";
 }
 
-int EmvEntity::getEntityDataInt(QString _key)
+int EmvEntity::getEntityDataInt(QString _key, int base)
 {
 	int maxSources = -1;
 	try
 	{
-		maxSources = entityData[_key].toInt();
+		bool temp = false;
+		maxSources = entityData[_key].toInt(&temp, base);
 	}
 	catch (...)
 	{

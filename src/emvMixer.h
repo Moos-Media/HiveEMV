@@ -61,6 +61,7 @@ private:
 	QMap<int, EmvControl> controls;
 	QMap<int, bool> states;
 	QMap<int, int> controlIndexLookupTable;
+	QMap<int, QLabel*> labelLookupTable;
 	QString type;
 
 };

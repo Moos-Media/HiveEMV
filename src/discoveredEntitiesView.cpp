@@ -203,9 +203,6 @@ DiscoveredEntitiesView::DiscoveredEntitiesView(QWidget* parent)
 						inspect = menu.addAction("Inspect Entity Model...");
 					}
 					{
-						emv = menu.addAction("Entity Model Viewer...");
-					}
-					{
 						getLogo = menu.addAction("Retrieve Entity Logo");
 						getLogo->setEnabled(!hive::widgetModelsLibrary::EntityLogoCache::getInstance().isImageInCache(entityID, hive::widgetModelsLibrary::EntityLogoCache::Type::Entity));
 					}
@@ -267,15 +264,6 @@ DiscoveredEntitiesView::DiscoveredEntitiesView(QWidget* parent)
 						inspector->setControlledEntityID(entityID);
 						inspector->restoreGeometry(_inspectorGeometry);
 						inspector->show();
-					}
-					else if (action == emv)
-					{
-						auto* emv = new EmvView();
-						emv->setDebug(false);
-						emv->setAttribute(Qt::WA_DeleteOnClose);
-						emv->setControlledEntityID(entityID);
-						emv->restoreGeometry(_inspectorGeometry);
-						emv->show();
 					}
 					else if (action == getLogo)
 					{

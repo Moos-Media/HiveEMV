@@ -74,6 +74,7 @@ void EntityInspector::setControlledEntityID(la::avdecc::UniqueIdentifier const e
 	_controlledEntityTreeWiget.setControlledEntityID(entityID);
 	setEnabled(true);
 	configureWindowTitle();
+	emit entityChanged(entityID);
 }
 
 la::avdecc::UniqueIdentifier EntityInspector::controlledEntityID() const

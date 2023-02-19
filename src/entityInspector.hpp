@@ -52,6 +52,7 @@ public:
 	bool restoreState(QByteArray const& state, int version = 0);
 
 	Q_SIGNAL void stateChanged();
+	Q_SIGNAL void entityChanged(la::avdecc::UniqueIdentifier);
 
 private:
 	Q_SLOT void controllerOffline();

@@ -69,8 +69,8 @@ static SettingsManager::SettingDefault Setting1 = { "emvSettingsEnable", 0 };
 static SettingsManager::SettingDefault Setting2 = { "emvSettingsGain", 0 };
 static SettingsManager::SettingDefault Setting3 = { "emvSettingsInvert", 0 };
 static SettingsManager::SettingDefault Setting4 = { "emvSettingsPhantom", 0 };
-static SettingsManager::SettingDefault Setting5 = { "emvSettingsBox1", 0 };
-static SettingsManager::SettingDefault Setting6 = { "emvSettingsBox2", 0 };
+static SettingsManager::SettingDefault Setting7 = { "languagePreference", 0 };
+static SettingsManager::SettingDefault Setting8 = { "emvAutoChange", true };
 
 #ifdef DEBUG
 static SettingsManager::SettingDefault Controller_ControllerSubID = { "avdecc/controller/controllerSubID_Debug", 4 + (hive::internals::marketingDigits > 2u ? 0x8000 : 0) };

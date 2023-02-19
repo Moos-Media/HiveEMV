@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>653</width>
+    <width>549</width>
     <height>885</height>
    </rect>
   </property>
@@ -14,52 +14,14 @@
    <string>EmvView</string>
   </property>
   <layout class="QGridLayout" name="gridLayout">
-   <item row="3" column="2" colspan="2">
+   <item row="5" column="2" colspan="2">
     <widget class="QComboBox" name="configurationPicker">
-     <item>
-      <property name="text">
-       <string>Test 1</string>
-      </property>
-     </item>
-     <item>
-      <property name="text">
-       <string>Test2</string>
-      </property>
-     </item>
-    </widget>
-   </item>
-   <item row="3" column="1">
-    <widget class="QLabel" name="label">
-     <property name="text">
-      <string>Choose Configuration:</string>
+     <property name="toolTip">
+      <string>Select Configuration from list. Only available Configurations are shown.</string>
      </property>
     </widget>
    </item>
-   <item row="2" column="3">
-    <widget class="QPushButton" name="openFilePushButton">
-     <property name="enabled">
-      <bool>false</bool>
-     </property>
-     <property name="text">
-      <string>OpenFile</string>
-     </property>
-    </widget>
-   </item>
-   <item row="2" column="1">
-    <widget class="QLabel" name="entityLabel">
-     <property name="font">
-      <font>
-       <pointsize>12</pointsize>
-       <weight>75</weight>
-       <bold>true</bold>
-      </font>
-     </property>
-     <property name="text">
-      <string>Entity Name</string>
-     </property>
-    </widget>
-   </item>
-   <item row="5" column="1" colspan="4">
+   <item row="7" column="1" colspan="4">
     <widget class="QTabWidget" name="tabWidget">
      <property name="currentIndex">
       <number>0</number>
@@ -88,11 +50,80 @@
      </widget>
     </widget>
    </item>
-   <item row="2" column="2">
-    <widget class="QComboBox" name="languagePicker">
+   <item row="1" column="2" colspan="2">
+    <widget class="QComboBox" name="entityPicker">
+     <property name="toolTip">
+      <string>Select Entity from list. Add by pressing the Open File Button.</string>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="1" colspan="2">
+    <widget class="QLabel" name="entityLabel">
+     <property name="font">
+      <font>
+       <pointsize>12</pointsize>
+       <weight>75</weight>
+       <bold>true</bold>
+      </font>
+     </property>
+     <property name="text">
+      <string>Entity Name</string>
+     </property>
+    </widget>
+   </item>
+   <item row="5" column="4">
+    <widget class="QPushButton" name="configurationChangeButton">
      <property name="enabled">
       <bool>false</bool>
      </property>
+     <property name="toolTip">
+      <string>Apply changes to selected configuration.</string>
+     </property>
+     <property name="text">
+      <string>Apply</string>
+     </property>
+    </widget>
+   </item>
+   <item row="5" column="1">
+    <widget class="QLabel" name="label">
+     <property name="text">
+      <string>Choose Configuration:</string>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="4">
+    <widget class="QPushButton" name="openFilePushButton">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
+     <property name="toolTip">
+      <string>Click to add new Entity to the list.</string>
+     </property>
+     <property name="text">
+      <string>Open Entity File</string>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="1">
+    <widget class="QLabel" name="label_2">
+     <property name="text">
+      <string>Choose loaded Entity:</string>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="4">
+    <widget class="QComboBox" name="languagePicker">
+     <property name="enabled">
+      <bool>true</bool>
+     </property>
+     <property name="toolTip">
+      <string>Choose display language of Entity, if supported. Auto will detect System Language.</string>
+     </property>
+     <item>
+      <property name="text">
+       <string>Auto</string>
+      </property>
+     </item>
      <item>
       <property name="text">
        <string>English</string>
@@ -110,30 +141,13 @@
      </item>
     </widget>
    </item>
-   <item row="3" column="4">
-    <widget class="QPushButton" name="configurationChangeButton">
-     <property name="enabled">
-      <bool>false</bool>
-     </property>
-     <property name="text">
-      <string>Apply</string>
-     </property>
-    </widget>
-   </item>
-   <item row="2" column="4">
+   <item row="8" column="1" colspan="4">
     <widget class="QPushButton" name="openSettingsPushButton">
+     <property name="toolTip">
+      <string>Show EMV Settings</string>
+     </property>
      <property name="text">
       <string>Settings</string>
-     </property>
-    </widget>
-   </item>
-   <item row="1" column="2" colspan="2">
-    <widget class="QComboBox" name="entityPicker"/>
-   </item>
-   <item row="1" column="1">
-    <widget class="QLabel" name="label_2">
-     <property name="text">
-      <string>Choose loaded Entity:</string>
      </property>
     </widget>
    </item>

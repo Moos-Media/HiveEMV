@@ -6,30 +6,42 @@
 #include <QCoreApplication>
 #include "emvEntity.h"
 #include "emvFileHandler.h"
+#include "entityInspector.hpp"
 #include "emvSettings.h"
 
 
 EmvView::EmvView(QWidget * parent)
 	: QWidget(parent)
 {
-	isDebug = true;
-	languageIdentifier = "EN";
-	entityPickerIndex = -1;
 	setupUi(this);
+	auto* const settings = qApp->property(settings::SettingsManager::PropertyName).value<settings::SettingsManager*>();
 
-	if (isDebug)
-	{
-		openFilePushButton->setEnabled(true);
-		languagePicker->setEnabled(true);
-	}
+	int langSetting = settings->getValue("languagePreference").toInt();
+
+	if (langSetting == 0)
+		languageIdentifier = QLocale::system().name().mid(0, 2).toUpper();
+	else if (langSetting == 1)
+		languageIdentifier = "EN";
+	else if (langSetting == 2)
+		languageIdentifier == "DE";
+	else if (langSetting == 3)
+		languageIdentifier = "FR";
+	else
+		languageIdentifier = "EN";
+
+	entityPickerIndex = -1;
+	
+
+	openFilePushButton->setEnabled(true);
+	languagePicker->setCurrentIndex(langSetting);
+
 
 	QObject::connect(openFilePushButton, SIGNAL(clicked()), this, SLOT(openFile()));
 	QObject::connect(openSettingsPushButton, SIGNAL(clicked()), this, SLOT(openSettings()));
 	QObject::connect(configurationChangeButton, SIGNAL(clicked()), this, SLOT(changeConfigurationClicked()));
 	QObject::connect(languagePicker, SIGNAL(currentIndexChanged(int)), this, SLOT(changeLanguage()));
-	
+
 	tabWidget->removeTab(0);
-	
 }
 
 EmvView::~EmvView()
@@ -55,24 +67,6 @@ void EmvView::addJacksViews() {
 		EmvMixer* newMixer2 = new EmvMixer(&myEntity, type, this);
 		tabWidget->addTab(newMixer2, mixerName);
 	}
-}
-
-void EmvView::setControlledEntityID(la::avdecc::UniqueIdentifier const entityID)
-{
-	//Save Entity ID
-	controlledEntityID = entityID;
-
-	myEntity = EmvEntity(controlledEntityID);
-	EmvMixer* metaData = new EmvMixer(&myEntity, "METADATA", this);
-	tabWidget->addTab(metaData, "Entity Information");
-
-	//Update Titles
-	setWindowTitle(getEntityName());
-	entityLabel->setText(getEntityName());
-
-	//Update Window
-	setView();
-	
 }
 
 QString EmvView::getEntityName()
@@ -107,6 +101,9 @@ void EmvView::updateConfigurationPicker()
 
 void EmvView::setView()
 {
+	if (entityList.size() == 0)
+		return;
+
 	//Update Entity Picker
 	QObject::disconnect(entityPicker, SIGNAL(currentIndexChanged(int)), this, SLOT(changeEntity()));
 	
@@ -158,14 +155,15 @@ void EmvView::setView()
 void EmvView::changeConfigurationClicked() {
 
 	int target = configurationPicker->currentIndex();
-	hive::modelsLibrary::ControllerManager::getInstance().setConfiguration(controlledEntityID, target);
+	hive::modelsLibrary::ControllerManager::getInstance().setConfiguration(myEntity.getLaEntityID(), target);
 	QThread::sleep(2); // Temp fix
-	setControlledEntityID(controlledEntityID);
 }
 
 void EmvView::openFile() {
-	fileLocation = QFileDialog::getOpenFileName(this, "Open Entity XML", "G://Meine Ablage/__Studium/9. Semester/Bachelorarbeit");
-	//fileLocation = "G:/Meine Ablage/__Studium/9. Semester/Bachelorarbeit/Models/12mic.aemxml";
+	fileLocation = QFileDialog::getOpenFileName(this, "Open Entity XML", "C://", tr("AEMXML (*.aemxml)"));
+
+	if (fileLocation.isEmpty())
+		return;
 
 	if (!fileLocations.contains(fileLocation))
 	{
@@ -175,8 +173,6 @@ void EmvView::openFile() {
 		myEntity = entityList[newIndex];
 		++entityPickerIndex;
 	}
-
-	//EmvFileHandler myHandler = EmvFileHandler(fileLocation, languageIdentifier);
 
 	setView();
 }
@@ -203,22 +199,31 @@ void EmvView::changeLanguage() {
 	//Get current Index of selected Language
 	int langIndex = languagePicker->currentIndex();
 
+	auto* const settings = qApp->property(settings::SettingsManager::PropertyName).value<settings::SettingsManager*>();
+
+	settings->setValue("languagePreference", langIndex);
+
 	if (langIndex == 0)
-		languageIdentifier = "EN";
+		languageIdentifier = QLocale::system().name().mid(0, 2).toUpper();
 	else if (langIndex == 1)
-		languageIdentifier = "DE";
+		languageIdentifier = "EN";
 	else if (langIndex == 2)
+		languageIdentifier == "DE";
+	else if (langIndex == 3)
 		languageIdentifier = "FR";
 	else
 		languageIdentifier = "EN";
 
-	
-	myEntity.changeLanguage(languageIdentifier);
-	qDebug() << languageIdentifier << "Lang identifier";
+	qDebug() << languageIdentifier;	
+
+	for (int i = 0; i < entityList.size(); ++i)
+	{
+		auto currentEntity = entityList.value(i);
+		currentEntity.changeLanguage(languageIdentifier);
+	}
 
 	if (fileLocation != "")
 		setView();
-	qDebug() << myEntity.language << "Lang im Entity";
 }
 
 void EmvView::setDebug(bool _isDebug) {
@@ -237,4 +242,26 @@ void EmvView::changeEntity() {
 	myEntity = entityList[entityPickerIndex];
 
 	setView();
+}
+
+void EmvView::controlledEntityChanged(la::avdecc::UniqueIdentifier _entityID)
+{
+	auto* const settings = qApp->property(settings::SettingsManager::PropertyName).value<settings::SettingsManager*>();
+
+	bool doUpdate = settings->getValue("emvAutoChange").toBool();
+
+	if (!doUpdate)
+		return;
+
+	for (int i = 0; i < entityList.size(); ++i)
+	{
+		auto currentEntity = entityList.value(i);
+
+		if (currentEntity.getLaEntityID() == _entityID)
+		{
+			entityPicker->setCurrentIndex(i);
+			break;
+		}
+	}
+	
 }

@@ -13,8 +13,7 @@ emvSettings::emvSettings(QWidget* parent)
 	ui->comboBoxGain->setCurrentIndex(settings->getValue("emvSettingsGain").toInt());
 	ui->comboBoxInvert->setCurrentIndex(settings->getValue("emvSettingsInvert").toInt());
 	ui->comboBoxPhantom->setCurrentIndex(settings->getValue("emvSettingsPhantom").toInt());
-	ui->comboBox_1->setCurrentIndex(settings->getValue("emvSettingsBox1").toInt());
-	ui->comboBox_2->setCurrentIndex(settings->getValue("emvSettingsBox2").toInt());
+	ui->autoChangeCheckBox->setChecked(settings->getValue("emvAutoChange").toBool());
 }
 
 emvSettings::~emvSettings()
@@ -29,8 +28,7 @@ void emvSettings::saveSettings() {
 	settings->setValue("emvSettingsGain", ui->comboBoxGain->currentIndex());
 	settings->setValue("emvSettingsInvert", ui->comboBoxInvert->currentIndex());
 	settings->setValue("emvSettingsPhantom", ui->comboBoxPhantom->currentIndex());
-	settings->setValue("emvSettingsBox1", ui->comboBox_1->currentIndex());
-	settings->setValue("emvSettingsBox2", ui->comboBox_2->currentIndex());
+	settings->setValue("emvAutoChange", ui->autoChangeCheckBox->isChecked());
 
 	emit settingsChanged();
 }

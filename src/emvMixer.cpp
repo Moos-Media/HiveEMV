@@ -37,7 +37,7 @@ EmvMixer::EmvMixer(EmvEntity *entity, QString _type, QWidget *parent)
 	else
 	{
 		channelAmount = 10;
-		addChannels();
+		//addChannels(); //For Screenshotting only
 	}
 
 	auto* const settings = qApp->property(settings::SettingsManager::PropertyName).value<settings::SettingsManager*>();
@@ -52,20 +52,21 @@ EmvMixer::~EmvMixer()
 
 void EmvMixer::updateGainDial()
 {
-	int amount = 13;
-	QDial* changedDial = qobject_cast<QDial*>(sender());
-	int value = changedDial->value();
-	int index = mixerArea->indexOf(changedDial);
-	int channel = (index - (index % amount)) / amount;
+	QAbstractSlider* caller = qobject_cast<QAbstractSlider*>(sender());
+	int index = mixerArea->indexOf(caller);
+	auto label = labelLookupTable.value(index-1);
+	EmvControl activatedControl = controls[index];
 
-	int gain = 0;
-	if (padCheckBoxes[0][channel]->isChecked())
-		gain = gain - 26;
+	int value = caller->value();
+	auto values = activatedControl.values.at(0);
 
-	gain = gain + ownMap(value, 0, 99, 20, 64);
+	value = ownMap(value, caller->minimum(), caller->maximum(), values.minValue, values.maxValue);
+	value = clampValue(value, values.minValue, values.maxValue, values.stepValue);
+	QString unit = (values.units[2] == "b" && values.units[3] == "0") ? " dB" : "";
+																																		
+	QString output = QString::number(value).append(unit);
 
-	string output = to_string(gain);
-	gainLabels[0][channel]->setText(QString::fromStdString(output));
+	label->setText(output);
 }
 void EmvMixer::updateGainPad()
 {
@@ -532,6 +533,7 @@ void EmvMixer::addJacks(QString _dir) {
 			mixerArea->addWidget(new QLabel(myEntity->getLocale(indexx, indexy)), newRow, newColumn);
 			++newRow;
 			++controlIndexCounter;
+
 			addControlsToPage(currentControl, newRow, newColumn);
 			controls.insert(controlIndexCounter, currentControl);
 			controlIndexLookupTable.insert(controlIndexCounter, absoluteIndexCounter);
@@ -557,6 +559,17 @@ void EmvMixer::addJacks(QString _dir) {
 					mixerArea->addWidget(new QLabel(myEntity->getLocale(indexx, indexy)), newRow, newColumn);
 					++newRow;
 					++controlIndexCounter;
+
+					//Add Gain Label
+					if (currentPort.controls[z].controlTypeIndex == 4 || currentPort.controls[z].controlTypeIndex == 5)
+					{
+						QLabel* gainLabel = new QLabel("0");
+						mixerArea->addWidget(gainLabel, newRow, newColumn, Qt::AlignCenter);
+						labelLookupTable.insert(controlIndexCounter, gainLabel);
+						++newRow;
+						++controlIndexCounter;
+					}
+
 					addControlsToPage(currentPort.controls[z], newRow, newColumn);
 					controls.insert(controlIndexCounter, currentPort.controls[z]);
 					controlIndexLookupTable.insert(controlIndexCounter, absoluteIndexCounter);
@@ -856,29 +869,31 @@ void EmvMixer::addControlsToPage(EmvControl control, int row, int column) {
 		{
 			QCheckBox* enable = new QCheckBox();
 			QObject::connect(enable, SIGNAL(stateChanged(int)), this, SLOT(controlCheckBoxChanged()));
-			mixerArea->addWidget(enable, row, column);
+			mixerArea->addWidget(enable, row, column, Qt::AlignCenter);
 		}
 		else
 		{
 			QPushButton* enable = new QPushButton("Toggle");
 			QObject::connect(enable, SIGNAL(clicked()), this, SLOT(controlPushButtonChanged()));
-			mixerArea->addWidget(enable, row, column);
+			mixerArea->addWidget(enable, row, column, Qt::AlignCenter);
 		}
 	}
-	else if (index == 4)
+	else if (index == 4 || index == 5)
 	{
 		if (settings->getValue("emvSettingsGain").toInt() == 0)
 		{
 			QDial* gain = new QDial();
 			gain->setMaximumWidth(75);
 			QObject::connect(gain, SIGNAL(sliderReleased()), this, SLOT(controlDialChanged()));
-			mixerArea->addWidget(gain, row, column);
+			QObject::connect(gain, SIGNAL(valueChanged(int)), this, SLOT(updateGainDial()));
+			mixerArea->addWidget(gain, row, column, Qt::AlignCenter);
 		}
 		else
 		{
 			QSlider* gain = new QSlider();
 			QObject::connect(gain, SIGNAL(sliderReleased()), this, SLOT(controlDialChanged()));
-			mixerArea->addWidget(gain, row, column);
+			QObject::connect(gain, SIGNAL(valueChanged(int)), this, SLOT(updateGainDial()));
+			mixerArea->addWidget(gain, row, column, Qt::AlignCenter);
 		}
 	}
 	else if (index == 3)
@@ -887,13 +902,13 @@ void EmvMixer::addControlsToPage(EmvControl control, int row, int column) {
 		{
 			QCheckBox* invert = new QCheckBox();
 			QObject::connect(invert, SIGNAL(stateChanged(int)), this, SLOT(controlCheckBoxChanged()));
-			mixerArea->addWidget(invert, row, column);
+			mixerArea->addWidget(invert, row, column, Qt::AlignCenter);
 		}
 		else
 		{
 			QPushButton* invert = new QPushButton("Toggle");
 			QObject::connect(invert, SIGNAL(clicked()), this, SLOT(controlPushButtonChanged()));
-			mixerArea->addWidget(invert, row, column);
+			mixerArea->addWidget(invert, row, column, Qt::AlignCenter);
 		}
 	}
 	else if (index == 31)
@@ -902,13 +917,13 @@ void EmvMixer::addControlsToPage(EmvControl control, int row, int column) {
 		{
 			QCheckBox* phantomPower = new QCheckBox();
 			QObject::connect(phantomPower, SIGNAL(stateChanged(int)), this, SLOT(controlCheckBoxChanged()));
-			mixerArea->addWidget(phantomPower, row, column);
+			mixerArea->addWidget(phantomPower, row, column, Qt::AlignCenter);
 		}
 		else
 		{
 			QPushButton* phantomPower = new QPushButton("Toggle");
 			QObject::connect(phantomPower, SIGNAL(clicked()), this, SLOT(controlPushButtonChanged()));
-			mixerArea->addWidget(phantomPower, row, column);
+			mixerArea->addWidget(phantomPower, row, column, Qt::AlignCenter);
 		}
 	}
 	else if (index == 8)
@@ -929,7 +944,6 @@ void EmvMixer::addControlsToPage(EmvControl control, int row, int column) {
 	{
 		QString text = "Option: ";
 		int upperBound = control.values.at(0).options.count();
-		qDebug() << "upper Bound:" <<upperBound;
 		QComboBox* options = new QComboBox();
 		for (int i = 0; i < upperBound; i++)
 		{
@@ -943,8 +957,6 @@ void EmvMixer::addControlsToPage(EmvControl control, int row, int column) {
 		mixerArea->addWidget(identify, row, column);
 	else if(index == 2)
 		mixerArea->addWidget(mute, row, column);				
-	else if(index == 5)
-		mixerArea->addWidget(attenuate, row, column);
 	else if(index == 6)
 		mixerArea->addWidget(delay, row, column);
 	else if(index == 7)

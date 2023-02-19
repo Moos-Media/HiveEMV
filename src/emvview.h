@@ -40,6 +40,7 @@ private slots:
 	void changeLanguage();
 	void settingsFinished(int resultCode);
 	void changeEntity();
+	void controlledEntityChanged(la::avdecc::UniqueIdentifier _entityID);
 
 private:
 	bool isDebug;

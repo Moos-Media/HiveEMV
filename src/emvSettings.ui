@@ -23,55 +23,6 @@
     </rect>
    </property>
    <layout class="QGridLayout" name="gridLayout">
-    <item row="5" column="1">
-     <widget class="QComboBox" name="comboBox_2">
-      <item>
-       <property name="text">
-        <string>Dropdown Box</string>
-       </property>
-      </item>
-      <item>
-       <property name="text">
-        <string>Dial</string>
-       </property>
-      </item>
-     </widget>
-    </item>
-    <item row="3" column="0">
-     <widget class="QLabel" name="label_4">
-      <property name="text">
-       <string>Phantom Power</string>
-      </property>
-     </widget>
-    </item>
-    <item row="2" column="0">
-     <widget class="QLabel" name="label_3">
-      <property name="text">
-       <string>Gain</string>
-      </property>
-     </widget>
-    </item>
-    <item row="4" column="0">
-     <widget class="QLabel" name="label_5">
-      <property name="text">
-       <string>Unknown 1</string>
-      </property>
-     </widget>
-    </item>
-    <item row="0" column="0">
-     <widget class="QLabel" name="label">
-      <property name="text">
-       <string>Enable</string>
-      </property>
-     </widget>
-    </item>
-    <item row="5" column="0">
-     <widget class="QLabel" name="label_6">
-      <property name="text">
-       <string>Unknown 2</string>
-      </property>
-     </widget>
-    </item>
     <item row="3" column="1">
      <widget class="QComboBox" name="comboBoxPhantom">
       <property name="sizeAdjustPolicy">
@@ -89,21 +40,18 @@
       </item>
      </widget>
     </item>
-    <item row="4" column="1">
-     <widget class="QComboBox" name="comboBox_1">
-      <property name="sizeAdjustPolicy">
-       <enum>QComboBox::AdjustToContents</enum>
+    <item row="2" column="0">
+     <widget class="QLabel" name="label_3">
+      <property name="text">
+       <string>Gain</string>
       </property>
-      <item>
-       <property name="text">
-        <string>Dropdown Box</string>
-       </property>
-      </item>
-      <item>
-       <property name="text">
-        <string>Dial</string>
-       </property>
-      </item>
+     </widget>
+    </item>
+    <item row="0" column="0">
+     <widget class="QLabel" name="label">
+      <property name="text">
+       <string>Enable</string>
+      </property>
      </widget>
     </item>
     <item row="0" column="1">
@@ -121,6 +69,46 @@
         <string>Button</string>
        </property>
       </item>
+     </widget>
+    </item>
+    <item row="1" column="1">
+     <widget class="QComboBox" name="comboBoxInvert">
+      <property name="sizeAdjustPolicy">
+       <enum>QComboBox::AdjustToContents</enum>
+      </property>
+      <item>
+       <property name="text">
+        <string>Check Box</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Button</string>
+       </property>
+      </item>
+     </widget>
+    </item>
+    <item row="5" column="0">
+     <widget class="QDialogButtonBox" name="buttonBox">
+      <property name="layoutDirection">
+       <enum>Qt::LeftToRight</enum>
+      </property>
+      <property name="autoFillBackground">
+       <bool>true</bool>
+      </property>
+      <property name="orientation">
+       <enum>Qt::Horizontal</enum>
+      </property>
+      <property name="standardButtons">
+       <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
+      </property>
+     </widget>
+    </item>
+    <item row="3" column="0">
+     <widget class="QLabel" name="label_4">
+      <property name="text">
+       <string>Phantom Power</string>
+      </property>
      </widget>
     </item>
     <item row="1" column="0">
@@ -147,36 +135,23 @@
       </item>
      </widget>
     </item>
-    <item row="1" column="1">
-     <widget class="QComboBox" name="comboBoxInvert">
-      <property name="sizeAdjustPolicy">
-       <enum>QComboBox::AdjustToContents</enum>
-      </property>
-      <item>
-       <property name="text">
-        <string>Check Box</string>
-       </property>
-      </item>
-      <item>
-       <property name="text">
-        <string>Button</string>
-       </property>
-      </item>
-     </widget>
-    </item>
-    <item row="6" column="0">
-     <widget class="QDialogButtonBox" name="buttonBox">
-      <property name="layoutDirection">
-       <enum>Qt::LeftToRight</enum>
-      </property>
-      <property name="autoFillBackground">
+    <item row="4" column="1">
+     <widget class="QCheckBox" name="autoChangeCheckBox">
+      <property name="enabled">
        <bool>true</bool>
       </property>
-      <property name="orientation">
-       <enum>Qt::Horizontal</enum>
+      <property name="text">
+       <string>Enable</string>
       </property>
-      <property name="standardButtons">
-       <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
+      <property name="checked">
+       <bool>true</bool>
+      </property>
+     </widget>
+    </item>
+    <item row="4" column="0">
+     <widget class="QLabel" name="label_5">
+      <property name="text">
+       <string>Auto Change displayed Entity with Discovered Entity View</string>
       </property>
      </widget>
     </item>

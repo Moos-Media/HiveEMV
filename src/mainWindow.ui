@@ -165,6 +165,18 @@
    </attribute>
    <widget class="DiscoveredEntitiesView" name="discoveredEntitiesView"/>
   </widget>
+  <widget class="QDockWidget" name="emvDockWidget">
+   <property name="allowedAreas">
+    <set>Qt::TopDockWidgetArea | Qt::RightDockWidgetArea</set>
+   </property>
+   <property name="windowTitle">
+    <string>Entity Model Viewer</string>
+   </property>
+   <attribute name="dockWidgetArea">
+    <number>4</number>
+   </attribute>
+   <widget class="EmvView" name="emvview"/>
+  </widget>
   <action name="actionQuit">
    <property name="text">
     <string>&amp;Quit</string>
@@ -248,6 +260,11 @@
    <class>EntityInspector</class>
    <extends>QWidget</extends>
    <header>entityInspector.hpp</header>
+  </customwidget>
+  <customwidget>
+   <class>EmvView</class>
+   <extends>QWidget</extends>
+   <header>emvview.h</header>
   </customwidget>
  </customwidgets>
  <resources/>

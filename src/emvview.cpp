@@ -146,7 +146,7 @@ void EmvView::setView()
 
 	//Add Channels Tab
 	EmvMixer* mixerControls = new EmvMixer(&myEntity, "MIXER", this);
-	tabWidget->addTab(mixerControls, "Channels view");
+	//tabWidget->addTab(mixerControls, "Channels view");
 
 	//Get back to old Tab
 	tabWidget->setCurrentIndex(oldIndex);

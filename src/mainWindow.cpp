@@ -56,6 +56,7 @@
 #include "windowsNpfHelper.hpp"
 #include "visibilitySettings.hpp"
 #include "listViewSelectionToMatrixModelController.hpp"
+#include "emvview.h"
 
 #include <QtMate/widgets/comboBox.hpp>
 #include <QtMate/widgets/flatIconButton.hpp>

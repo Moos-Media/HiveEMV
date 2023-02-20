@@ -23,14 +23,14 @@ EmvView::EmvView(QWidget * parent)
 	else if (langSetting == 1)
 		languageIdentifier = "EN";
 	else if (langSetting == 2)
-		languageIdentifier == "DE";
+		languageIdentifier = "DE";
 	else if (langSetting == 3)
 		languageIdentifier = "FR";
 	else
 		languageIdentifier = "EN";
 
 	entityPickerIndex = -1;
-	
+
 
 	openFilePushButton->setEnabled(true);
 	languagePicker->setCurrentIndex(langSetting);
@@ -91,10 +91,7 @@ void EmvView::updateConfigurationPicker()
 	configurationPicker->clear();
 	for (int i = 0; i < myEntity.getConfigurationCount(); ++i)
 	{
-		if (isDebug)
-			configurationPicker->addItem(myEntity.getConfigurationDescription(i));
-		else
-			configurationPicker->addItem(myEntity.getConfiguration(i).getConfigName());
+		configurationPicker->addItem(myEntity.getConfigurationDescription(i));
 	}
 	configurationPicker->setCurrentIndex(myEntity.getCurrentConfigurationIndex());
 }
@@ -122,6 +119,8 @@ void EmvView::setView()
 	//Block Config Change button
 	if (myEntity.getConfigurationCount() > 1)
 		configurationChangeButton->setEnabled(true);
+	else
+		configurationChangeButton->setEnabled(false);
 
 	//Clear old Tabs
 	tabWidget->clear();	
@@ -208,19 +207,20 @@ void EmvView::changeLanguage() {
 	else if (langIndex == 1)
 		languageIdentifier = "EN";
 	else if (langIndex == 2)
-		languageIdentifier == "DE";
+		languageIdentifier = "DE";
 	else if (langIndex == 3)
 		languageIdentifier = "FR";
 	else
 		languageIdentifier = "EN";
 
-	qDebug() << languageIdentifier;	
-
 	for (int i = 0; i < entityList.size(); ++i)
 	{
 		auto currentEntity = entityList.value(i);
 		currentEntity.changeLanguage(languageIdentifier);
+		entityList.remove(i);
+		entityList.insert(i, currentEntity);
 	}
+	changeEntity();
 
 	if (fileLocation != "")
 		setView();

@@ -258,7 +258,7 @@ QStringList EmvEntity::parseCapabilites(QString rawData) {
 void EmvEntity::changeLanguage(QString _lang)
 {
 	if (_lang.length() == 2)
-		language = _lang.toUpper();
+		this->language = _lang.toUpper();
 	else
 		qCritical() << "Wrong format for Locale Identifier";
 
@@ -285,7 +285,6 @@ QDomElement EmvEntity::xmlGetRootFromFile(QString _filename)
                qCritical() << "Error: Open file ";
                return entity;
             }
-            //qDebug() << file.isReadable();
             file.close();
     }
 

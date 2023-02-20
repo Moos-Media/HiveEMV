@@ -21,7 +21,6 @@ EmvMixer::EmvMixer(EmvEntity *entity, QString _type, QWidget *parent)
 
 	myEntity = entity;
 	controlledEntityID = myEntity->getLaEntityID();
-	qDebug() << controlledEntityID;
 
 
 	channelAmount = 0;
@@ -192,9 +191,6 @@ void EmvMixer::controlPushButtonChanged() {
 
 	int valueToSend = (state) ? (activatedControl.values.value(0).minValue) : (activatedControl.values.value(0).maxValue);
 	states[index] = !state;
-
-	qDebug() << myEntity->getCurrentConfiguration().getControl(0).controlValueType;
-	qDebug() << activatedControl.controlValueType;
 
 	if (activatedControl.controlValueType == "0001")
 	{
